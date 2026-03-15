@@ -12,22 +12,32 @@ export default async function handler(req) {
         return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
     }
 
-    const { text } = await req.json();
-    if (!text) {
-        return new Response(JSON.stringify({ error: 'No text provided' }), { status: 400 });
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+        return new Response(JSON.stringify({ error: 'API ključ nije podešen' }), {
+            status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        });
     }
 
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': process.env.ANTHROPIC_API_KEY,
-            'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 1024,
-            system: `Ti si nutritivni asistent. Korisnik unosi hranu na srpskom jeziku.
+    const { text } = await req.json();
+    if (!text) {
+        return new Response(JSON.stringify({ error: 'No text provided' }), {
+            status: 400, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+        });
+    }
+
+    try {
+        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'x-api-key': apiKey,
+                'anthropic-version': '2023-06-01'
+            },
+            body: JSON.stringify({
+                model: 'claude-haiku-4-5-20251001',
+                max_tokens: 1024,
+                system: `Ti si nutritivni asistent. Korisnik unosi hranu na srpskom jeziku.
 Vrati JSON niz sa prepoznatim namirnicama. Svaka namirnica ima:
 - name: string (srpski)
 - quantity: string (količina, npr "2 komada", "200ml")
@@ -38,21 +48,28 @@ Vrati JSON niz sa prepoznatim namirnicama. Svaka namirnica ima:
 - fat: number (grami masti)
 
 Vrati SAMO validan JSON niz, bez dodatnog teksta.`,
-            messages: [{ role: 'user', content: text }]
-        })
-    });
+                messages: [{ role: 'user', content: text }]
+            })
+        });
 
-    const data = await resp.json();
-    const content = data.content?.[0]?.text || '[]';
+        const data = await resp.json();
 
-    try {
-        const parsed = JSON.parse(content);
+        if (data.error) {
+            return new Response(JSON.stringify({ error: data.error.message || 'API greška' }), {
+                status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+            });
+        }
+
+        const content = data.content?.[0]?.text || '[]';
+        const cleaned = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+        const parsed = JSON.parse(cleaned);
+
         return new Response(JSON.stringify(parsed), {
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
         });
-    } catch {
-        return new Response(JSON.stringify([]), {
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+    } catch (err) {
+        return new Response(JSON.stringify({ error: 'Analiza nije uspela. Pokušaj ponovo.' }), {
+            status: 500, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
         });
     }
 }
