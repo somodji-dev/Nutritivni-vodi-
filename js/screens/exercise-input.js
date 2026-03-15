@@ -160,13 +160,42 @@ export function renderExerciseInput(container) {
     container.appendChild(screen);
 }
 
-const SVG_EXERCISE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>';
+const EXERCISE_ICONS = {
+    // Trčanje / running
+    run: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="4" r="2"/><path d="M15.59 13.51l-1.16-2.65a2.38 2.38 0 0 0-1.6-1.38l-2.21-.55a1.69 1.69 0 0 0-1.87.74L7 12.5"/><path d="m14 16.5-2.5-3.5L8 17l-3-1"/><path d="m17 14 2.78 5.14A1.3 1.3 0 0 1 18.64 21H17"/><path d="M8 17l-1.59 4.45A1.23 1.23 0 0 0 7.57 23h1.17"/></svg>',
+    // Šetnja / walking
+    walk: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M13.5 8.5 15 12l-3 3 1.5 5.5"/><path d="M10.5 8.5 9 12l3 3-1.5 5.5"/></svg>',
+    // Plivanje / swimming
+    swim: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18c2-1 4 1 6 0s4-1 6 0 4 1 6 0"/><path d="M2 22c2-1 4 1 6 0s4-1 6 0 4 1 6 0"/><circle cx="9" cy="7" r="2"/><path d="m9 9 2 4 5-3"/></svg>',
+    // Bicikl / cycling
+    bike: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>',
+    // Teretana / snaga / strength
+    strength: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>',
+    // Yoga / stretching
+    yoga: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M12 6v4"/><path d="m8 14 4-4 4 4"/><path d="M6 18h12"/><path d="M12 10v8"/></svg>',
+    // Lopte / ball sports
+    ball: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
+    // Default
+    default: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>'
+};
+
+function getExerciseIcon(name) {
+    const n = (name || '').toLowerCase();
+    if (/trč|sprint|jogging/.test(n)) return EXERCISE_ICONS.run;
+    if (/šetn|hodanj/.test(n)) return EXERCISE_ICONS.walk;
+    if (/plivan/.test(n)) return EXERCISE_ICONS.swim;
+    if (/bicikl|bajk|cycling/.test(n)) return EXERCISE_ICONS.bike;
+    if (/teretan|sklek|čučn|bench|deadlift|squat|zgib|bučic|press/.test(n)) return EXERCISE_ICONS.strength;
+    if (/yoga|pilates|stretc|istezanj/.test(n)) return EXERCISE_ICONS.yoga;
+    if (/fudbal|košark|odbojk|tenis|rukomet|ping|badminton/.test(n)) return EXERCISE_ICONS.ball;
+    return EXERCISE_ICONS.default;
+}
 
 function renderExerciseCard(item, idx) {
     return `
         <div class="food-card">
             <div class="food-card-header">
-                <span class="food-emoji" style="display:flex;">${SVG_EXERCISE}</span>
+                <span class="food-emoji" style="display:flex;">${getExerciseIcon(item.name)}</span>
                 <span class="food-name">${item.name}${item.duration ? ' (' + item.duration + ')' : ''}</span>
                 <span class="food-kcal">${item.kcalBurned} kcal</span>
                 <button class="exercise-remove" data-idx="${idx}" style="background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:16px; padding:4px;">✕</button>
