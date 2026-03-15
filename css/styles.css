@@ -1,0 +1,898 @@
+/* ========== OZZY Design System (from Pencil) ========== */
+
+:root {
+    /* Colors */
+    --primary: #FF9500;
+    --primary-light: #FFF3E0;
+    --primary-dark: #CC7700;
+    --blue: #00A8D8;
+    --blue-light: #E6F7FB;
+    --green: #4CAF50;
+    --green-light: #E8F5E9;
+    --red: #F44336;
+
+    --text-dark: #1A1F3A;
+    --text-light: #999999;
+    --text-muted: #BBBBBB;
+
+    --bg-white: #FFFFFF;
+    --bg-light: #F5F5F5;
+    --bg-gray: #F0F0F0;
+    --bg-divider: #E0E0E0;
+    --bg-border: #DDDDDD;
+    --bg-overlay: rgba(0, 0, 0, 0.4);
+
+    /* Fonts */
+    --font-primary: 'Poppins', sans-serif;
+    --font-numbers: 'Montserrat', sans-serif;
+
+    /* Radius */
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --r-xl: 20px;
+    --r-2xl: 22px;
+    --r-3xl: 28px;
+    --r-full: 9999px;
+}
+
+/* ========== Reset ========== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: var(--font-primary);
+    font-size: 14px;
+    color: var(--text-dark);
+    background: var(--bg-light);
+    -webkit-font-smoothing: antialiased;
+}
+
+#app {
+    width: 100%;
+    height: 100%;
+    max-width: 375px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+}
+
+/* ========== Screen ========== */
+.screen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-white);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ========== Nav Header ========== */
+.nav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 56px;
+    flex-shrink: 0;
+}
+
+.nav-back {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-light);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.nav-back:active { background: var(--bg-divider); }
+
+.nav-back svg {
+    width: 20px; height: 20px;
+    stroke: var(--text-dark);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.nav-right {
+    width: 44px; height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.nav-right svg {
+    width: 24px; height: 24px;
+    stroke: var(--text-muted);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.nav-step {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+/* ========== Buttons ========== */
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 56px;
+    border: none;
+    border-radius: var(--r-3xl);
+    font-family: var(--font-primary);
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:active { background: var(--primary-dark); }
+
+.btn-skip {
+    background: var(--bg-light);
+    border: 1px solid var(--bg-border);
+    border-radius: var(--r-lg);
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-light);
+    cursor: pointer;
+    height: auto;
+    width: auto;
+}
+
+/* ========== Option Cards (Quiz) ========== */
+.option-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px;
+    background: var(--bg-light);
+    border-radius: var(--r-lg);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.option-card:active,
+.option-card.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.option-card.warm { background: var(--primary-light); }
+
+.option-name {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.option-icon {
+    font-size: 28px;
+}
+
+/* Tempo card with extra info */
+.option-card .option-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+/* Gender cards - side by side */
+.gender-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 0 24px;
+}
+
+.gender-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 32px 16px;
+    border-radius: var(--r-lg);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 2px solid transparent;
+}
+
+.gender-card:active,
+.gender-card.selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.gender-card.male { background: var(--bg-light); }
+.gender-card.female { background: var(--bg-light); }
+
+.gender-card svg {
+    width: 48px; height: 48px;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.gender-card.male svg { stroke: var(--text-dark); }
+.gender-card.female svg { stroke: var(--primary); }
+
+.gender-card span {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* ========== 3-Card Picker (Age/Height/Weight) ========== */
+.picker-3card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0 24px;
+    -webkit-user-select: none;
+    user-select: none;
+    overflow: hidden;
+    touch-action: none;
+}
+
+.picker-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+    border-radius: var(--r-xl);
+    font-family: var(--font-numbers);
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.picker-card.side {
+    background: var(--bg-light);
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.picker-card.center {
+    background: var(--blue-light);
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--text-dark);
+    width: 120px;
+    height: 120px;
+    border-radius: var(--r-2xl);
+}
+
+/* ========== Mascot (Vozzy) CTA ========== */
+.mascot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 16px 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.3s ease;
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.mascot.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.mascot.active img {
+    animation: vozzyPulse 1.8s ease-in-out infinite;
+}
+
+.mascot:active {
+    transform: scale(0.95);
+}
+
+.mascot img {
+    height: 48px;
+    width: auto;
+    transition: transform 0.15s ease;
+}
+
+.mascot-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.mascot-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.mascot-action {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+@keyframes vozzyPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+}
+
+/* ========== BMI Result ========== */
+.bmi-screen {
+    background: var(--primary-light);
+}
+
+.bmi-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: var(--bg-white);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin: 0 auto;
+}
+
+.bmi-value {
+    font-family: var(--font-numbers);
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--blue);
+}
+
+.bmi-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--green);
+}
+
+.bmi-scale {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #00A8D8 0%, #4CAF50 30%, #FF9500 65%, #F44336 100%);
+    position: relative;
+}
+
+.bmi-marker {
+    position: absolute;
+    top: -4px;
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 8px solid var(--text-dark);
+    transform: translateX(-50%);
+}
+
+.bmi-category-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+}
+
+.bmi-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ========== Loading ========== */
+.loading-circle {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    position: relative;
+}
+
+.loading-circle.gray { background: var(--bg-divider); }
+.loading-circle.gradient {
+    background: linear-gradient(180deg, #00A8D8, #FF9500);
+}
+
+.loading-pulse {
+    color: var(--blue);
+    font-size: 28px;
+}
+
+/* ========== Dashboard ========== */
+.dash-header {
+    padding: 20px 20px 0;
+}
+
+.dash-greeting {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.dash-sub {
+    font-size: 13px;
+    color: var(--text-light);
+}
+
+/* Calorie card v2 (light bg, fire icon, progress bar) */
+.cal-card-v2 {
+    margin: 16px 20px;
+    padding: 20px;
+    background: var(--blue-light);
+    border-radius: var(--r-xl);
+    cursor: pointer;
+}
+
+/* Macro row */
+.macro-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px;
+}
+
+.macro-card {
+    flex: 1;
+    padding: 12px;
+    background: var(--bg-light);
+    border-radius: var(--r-lg);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.macro-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-light);
+}
+
+.macro-value {
+    font-family: var(--font-numbers);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.macro-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--bg-divider);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.macro-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
+}
+
+/* BMI card v2 (warm bg, heart icon) */
+.bmi-card-v2 {
+    margin: 12px 20px;
+    padding: 16px;
+    background: var(--primary-light);
+    border-radius: var(--r-lg);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Water tracker with clickable drops */
+.water-tracker {
+    margin: 12px 20px;
+    padding: 16px;
+    background: var(--bg-light);
+    border-radius: var(--r-lg);
+}
+
+.water-drop-btn:active {
+    transform: scale(1.2);
+}
+
+/* Meal cards */
+.meal-section {
+    padding: 16px 20px;
+}
+
+.meal-section h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+}
+
+.meal-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--bg-light);
+    border-radius: var(--r-lg);
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+}
+
+.meal-card:active { transform: scale(0.98); }
+.meal-card.logged { background: var(--green-light); }
+
+.meal-icon { font-size: 24px; display:flex; align-items:center; justify-content:center; width:32px; height:32px; }
+
+.meal-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.meal-name { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+.meal-cal { font-size: 12px; color: var(--text-light); }
+.meal-card.logged .meal-cal { color: var(--green); font-weight: 600; }
+
+/* ========== Meal Input ========== */
+.input-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: 56px;
+}
+
+.input-header .title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.cal-bar {
+    margin: 0 20px 16px;
+    padding: 10px 16px;
+    background: linear-gradient(90deg, var(--primary), var(--primary));
+    border-radius: var(--r-3xl);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.text-input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px;
+    background: var(--bg-white);
+    border: 1.5px solid var(--bg-divider);
+    border-radius: var(--r-md);
+    font-family: var(--font-primary);
+    font-size: 14px;
+    color: var(--text-dark);
+    resize: none;
+    outline: none;
+}
+
+.text-input::placeholder { color: var(--text-muted); }
+.text-input:focus { border-color: var(--primary); }
+
+.btn-analyze {
+    width: 100%;
+    height: 48px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: var(--r-3xl);
+    font-family: var(--font-primary);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Food cards (expandable) */
+.food-card {
+    background: var(--bg-light);
+    border-radius: var(--r-md);
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.food-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+
+.food-emoji { font-size: 22px; }
+.food-name { font-size: 14px; font-weight: 600; color: var(--text-dark); flex: 1; }
+.food-kcal {
+    font-family: var(--font-numbers);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.food-card-details {
+    display: none;
+    padding: 0 16px 12px;
+    gap: 8px;
+}
+
+.food-card.expanded .food-card-details { display: flex; }
+
+.macro-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--r-sm);
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.macro-chip.protein { background: var(--primary-light); color: var(--primary); }
+.macro-chip.carbs { background: var(--blue-light); color: var(--blue); }
+.macro-chip.fat { background: var(--green-light); color: var(--green); }
+
+/* Bottom save bar */
+.bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid var(--bg-divider);
+    background: var(--bg-white);
+    flex-shrink: 0;
+}
+
+/* ========== Overlays & Modals ========== */
+.overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--bg-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+}
+.popup-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.bottom-sheet {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%;
+    max-height: 85vh;
+    background: var(--bg-white);
+    border-radius: 24px 24px 0 0;
+    padding: 24px;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.center-modal {
+    margin: auto;
+    width: calc(100% - 64px);
+    max-width: 311px;
+    background: var(--bg-white);
+    border-radius: 24px;
+    padding: 28px;
+    animation: scaleIn 0.2s ease;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* Formula steps in popups */
+.formula-step {
+    padding: 16px;
+    background: var(--bg-light);
+    border-radius: var(--r-lg);
+    margin-bottom: 12px;
+}
+
+.formula-step .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    margin-right: 8px;
+}
+
+.formula-step .step-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.formula-step .step-formula {
+    font-size: 12px;
+    color: var(--text-light);
+    font-style: italic;
+    margin-top: 4px;
+}
+
+.formula-step .step-calc {
+    font-family: var(--font-numbers);
+    font-size: 13px;
+    color: var(--text-dark);
+    margin-top: 8px;
+}
+
+.formula-step .step-result {
+    font-family: var(--font-numbers);
+    font-size: 18px;
+    font-weight: 900;
+    margin-top: 4px;
+}
+
+/* ========== Disclaimer ========== */
+.disclaimer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 24px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.disclaimer svg {
+    width: 14px; height: 14px;
+    stroke: var(--text-muted);
+    stroke-width: 2;
+    fill: none;
+}
+
+/* ========== Loading spinner ========== */
+.spinner {
+    width: 48px; height: 48px;
+    border: 4px solid var(--bg-divider);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ========== Footer ========== */
+.dash-footer {
+    text-align: center;
+    padding: 16px 20px 24px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* ========== Profile Screen ========== */
+.profile-content { flex:1; overflow-y:auto; }
+.profile-name-section { padding:16px 20px; }
+.profile-section-label { font-size:13px; font-weight:600; color:var(--text-light); display:block; margin-bottom:8px; }
+.profile-name-input {
+    display:flex; align-items:center; gap:12px;
+    background:var(--bg-light); border-radius:16px; padding:14px 16px;
+}
+.profile-data-section { padding:16px 20px 0; }
+.profile-rows { display:flex; flex-direction:column; gap:8px; }
+.profile-row {
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--bg-light); border-radius:12px; padding:14px 16px;
+    cursor:pointer; transition: background 0.15s;
+}
+.profile-row:active { background: #EBEBEB; }
+.profile-row-label { font-size:14px; font-weight:500; color:var(--text-light); }
+.profile-row-right { display:flex; align-items:center; gap:6px; }
+.profile-row-value { font-size:14px; font-weight:600; color:var(--text-dark); }
+.profile-buttons {
+    display:flex; gap:6px; padding:12px 20px 0;
+}
+.profile-btn {
+    flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
+    height:44px; border-radius:16px; border:none; cursor:pointer;
+    font-size:12px; font-weight:600; font-family:Poppins,sans-serif;
+    transition: transform 0.1s;
+}
+.profile-btn:active { transform:scale(0.96); }
+.profile-btn.save { background:var(--green); color:white; }
+.profile-btn.retry { background:var(--bg-light); color:var(--text-dark); }
+.profile-btn.delete { background:transparent; border:1.5px solid #F44336; color:#F44336; }
+
+/* Profile option picker popup */
+.profile-option-btn {
+    padding:12px 16px; border-radius:12px; border:2px solid var(--bg-light);
+    background:var(--bg-light); font-size:14px; font-weight:500; color:var(--text-dark);
+    cursor:pointer; text-align:left; font-family:Poppins,sans-serif;
+    transition: all 0.15s;
+}
+.profile-option-btn:active { background:#EBEBEB; }
+.profile-option-btn.selected {
+    border-color:var(--primary); background:var(--primary-light); font-weight:600;
+}
+
+/* ========== Utility ========== */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.flex-1 { flex: 1; }
+.gap-4 { gap: 4px; }
+.gap-8 { gap: 8px; }
+.gap-12 { gap: 12px; }
+.gap-16 { gap: 16px; }
+.w-full { width: 100%; }
+.text-center { text-align: center; }
+.px-20 { padding-left: 20px; padding-right: 20px; }
+.px-24 { padding-left: 24px; padding-right: 24px; }

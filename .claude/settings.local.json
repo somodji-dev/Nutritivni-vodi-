@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude /login)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(ipconfig)",
+      "Bash(netstat -ano)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(taskkill //PID 32452 //F)",
+      "Bash(curl -s -X POST http://localhost:3000/api/analyze-food -H \"Content-Type: application/json\" -d '{\"\"\"\"text\"\"\"\":\"\"\"\"pljeskavica u lepinji\"\"\"\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/analyze-food -H \"Content-Type: application/json\" -d '{\"\"text\"\":\"\"pljeskavica u lepinji\"\"}')"
+    ]
+  }
+}
