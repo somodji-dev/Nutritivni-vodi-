@@ -3,7 +3,9 @@ import { navigate } from '../router.js';
 import { getTodayExercises, saveExercise, isAIDisclaimerAccepted, acceptAIDisclaimer, getProfile } from '../data-store.js';
 
 export function renderExerciseInput(container) {
-    let exerciseItems = [...getTodayExercises()];
+    const savedExercises = getTodayExercises();
+    let exerciseItems = [...savedExercises];
+    const hadSavedExercises = savedExercises.length > 0;
 
     const screen = document.createElement('div');
     screen.className = 'screen';
@@ -55,7 +57,7 @@ export function renderExerciseInput(container) {
                 </div>
             ` : '<div style="flex:1;"></div>'}
 
-            ${exerciseItems.length > 0 ? `
+            ${(exerciseItems.length > 0 || hadSavedExercises) ? `
                 <div class="bottom-bar">
                     <div>
                         <span style="font-size:12px; color:var(--text-light);">Ukupno potrošeno</span>
@@ -72,10 +74,8 @@ export function renderExerciseInput(container) {
         // Event listeners
         screen.querySelector('#backBtn').addEventListener('click', () => navigate('dashboard'));
         screen.querySelector('#saveCheck')?.addEventListener('click', () => {
-            if (exerciseItems.length > 0) {
-                saveExercise(exerciseItems);
-                navigate('dashboard');
-            }
+            saveExercise(exerciseItems);
+            navigate('dashboard');
         });
 
         screen.querySelector('#analyzeBtn').addEventListener('click', handleAnalyze);

@@ -13,6 +13,7 @@ export function renderMealInput(container, params = {}) {
     let foodItems = [];
     const existing = getTodayMeals()[type];
     if (existing) foodItems = [...existing];
+    const hadSavedFood = foodItems.length > 0;
 
     const screen = document.createElement('div');
     screen.className = 'screen';
@@ -59,12 +60,12 @@ export function renderMealInput(container, params = {}) {
                 <div style="padding:12px 20px 0;">
                     <p style="font-size:14px; font-weight:600; color:var(--text-dark);">Prepoznate namirnice (${foodItems.length})</p>
                 </div>
-                <div id="foodList" style="padding:8px 20px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; flex:1;">
+                <div id="foodList" style="padding:8px 20px; display:flex; flex-direction:column; gap:8px;">
                     ${foodItems.map((item, i) => renderFoodCard(item, i)).join('')}
                 </div>
             ` : '<div style="flex:1;"></div>'}
 
-            ${foodItems.length > 0 ? `
+            ${(foodItems.length > 0 || hadSavedFood) ? `
                 <div class="bottom-bar">
                     <div>
                         <span style="font-size:12px; color:var(--text-light);">Ukupno</span>
