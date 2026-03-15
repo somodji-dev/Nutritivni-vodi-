@@ -1,6 +1,6 @@
 // ========== Dashboard Screen (Pencil: 9oPY4) ==========
 import { navigate } from '../router.js';
-import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, clearAll } from '../data-store.js';
+import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises } from '../data-store.js';
 import { calcBMI, getBMICategory, calcMealCalories, calcWater, MACRO_SPLITS } from '../calculator.js';
 
 // SVG Icons matching Pencil design
@@ -32,9 +32,12 @@ export function renderDashboard(container) {
     const waterTarget = results.water;
     const bmi = results.bmi;
     const bmiCat = getBMICategory(bmi);
+    const exerciseCals = getDailyExerciseCalories();
+    const exercises = getTodayExercises();
 
-    const remaining = Math.max(0, results.calories - totals.kcal);
-    const calPercent = Math.min(100, (totals.kcal / results.calories) * 100);
+    const adjustedGoal = results.calories + exerciseCals;
+    const remaining = Math.max(0, adjustedGoal - totals.kcal);
+    const calPercent = Math.min(100, (totals.kcal / adjustedGoal) * 100);
 
     const screen = document.createElement('div');
     screen.className = 'screen';
@@ -63,7 +66,7 @@ export function renderDashboard(container) {
                     <div>
                         <p style="font-size:12px; font-weight:500; color:var(--text-light);">Dnevne kalorije</p>
                         <p style="font-family:var(--font-numbers); font-size:38px; font-weight:900; color:var(--text-dark); line-height:1.1; margin-top:4px;">${remaining.toLocaleString()}</p>
-                        <p style="font-size:12px; color:var(--text-light); margin-top:2px;">/ ${results.calories.toLocaleString()} kcal preostalo</p>
+                        <p style="font-size:12px; color:var(--text-light); margin-top:2px;">/ ${adjustedGoal.toLocaleString()} kcal preostalo${exerciseCals > 0 ? ' <span style="color:var(--green);">(+' + exerciseCals + ' vežba)</span>' : ''}</p>
                     </div>
                     <div style="width:40px; height:40px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center;">
                         ${SVG.fire}
@@ -95,6 +98,32 @@ export function renderDashboard(container) {
                 </div>
             </div>
 
+            <!-- Exercise Card -->
+            <div class="exercise-card" id="exerciseCard">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:18px;">🏃</span>
+                        <span style="font-size:13px; font-weight:600; color:var(--text-dark);">Današnja vežba</span>
+                    </div>
+                    <span style="font-family:var(--font-numbers); font-size:14px; font-weight:700; color:var(--primary);">${exerciseCals} kcal</span>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
+                    <span style="font-size:12px; color:var(--text-light);">${exercises.length > 0 ? exercises.map(e => e.emoji + ' ' + e.name + (e.duration ? ' ' + e.duration : '')).join('  ') : 'Dodaj vežbu'}</span>
+                    <div style="width:28px; height:28px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meals -->
+            <div class="meal-section">
+                <h3>Današnji obroci</h3>
+                ${renderMealCardV2('dorucak', 'Doručak', SVG.sun, mealCals.dorucak, meals.dorucak)}
+                ${renderMealCardV2('rucak', 'Ručak', SVG.cloudSun, mealCals.rucak, meals.rucak)}
+                ${renderMealCardV2('vecera', 'Večera', SVG.moon, mealCals.vecera, meals.vecera)}
+                ${renderMealCardV2('uzina', 'Užina', SVG.cookie, mealCals.uzina, meals.uzina)}
+            </div>
+
             <!-- Water Tracker (8 clickable drops) -->
             <div class="water-tracker">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
@@ -113,15 +142,6 @@ export function renderDashboard(container) {
                 </div>
             </div>
 
-            <!-- Meals -->
-            <div class="meal-section">
-                <h3>Današnji obroci</h3>
-                ${renderMealCardV2('dorucak', 'Doručak', SVG.sun, mealCals.dorucak, meals.dorucak)}
-                ${renderMealCardV2('rucak', 'Ručak', SVG.cloudSun, mealCals.rucak, meals.rucak)}
-                ${renderMealCardV2('vecera', 'Večera', SVG.moon, mealCals.vecera, meals.vecera)}
-                ${renderMealCardV2('uzina', 'Užina', SVG.cookie, mealCals.uzina, meals.uzina)}
-            </div>
-
             <!-- Footer -->
             <div class="dash-footer">
                 Powered by Ozzy NutriFon<br>
@@ -134,7 +154,8 @@ export function renderDashboard(container) {
             navigate('profile');
         });
 
-        screen.querySelector('#calCard').addEventListener('click', () => showCaloriesPopup(screen, profile, results));
+        screen.querySelector('#calCard').addEventListener('click', () => showCaloriesPopup(screen, profile, results, exerciseCals));
+        screen.querySelector('#exerciseCard').addEventListener('click', () => navigate('exercise'));
         screen.querySelector('#macroRow').addEventListener('click', () => showMacrosPopup(screen, profile, results));
 
         screen.querySelectorAll('.meal-card').forEach(card => {
@@ -189,7 +210,7 @@ function renderMealCardV2(type, name, icon, targetCal, items) {
     `;
 }
 
-function showCaloriesPopup(screen, profile, results) {
+function showCaloriesPopup(screen, profile, results, exerciseCals = 0) {
     const overlay = document.createElement('div');
     overlay.className = 'overlay';
     overlay.innerHTML = `
@@ -228,6 +249,18 @@ function showCaloriesPopup(screen, profile, results) {
                 <p class="step-calc">${results.tdee} - ${results.tdee - results.calories} (${profile.tempo.toLowerCase()})</p>
                 <p class="step-result" style="color:var(--green);">= ${results.calories} kcal dnevno</p>
             </div>
+
+            ${exerciseCals > 0 ? `
+            <div class="formula-step">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:var(--primary);">4</span>
+                    <span class="step-title">Vežba danas</span>
+                </div>
+                <p class="step-formula">Kalorijski cilj + potrošene kalorije od vežbe</p>
+                <p class="step-calc">${results.calories} + ${exerciseCals} (vežba)</p>
+                <p class="step-result" style="color:var(--primary);">= ${results.calories + exerciseCals} kcal prilagođeni cilj</p>
+            </div>
+            ` : ''}
         </div>
     `;
 

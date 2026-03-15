@@ -52,6 +52,24 @@ export function getDailyTotals() {
     return totals;
 }
 
+// Exercise (date-based)
+function exerciseKey(date) {
+    const d = date || new Date().toISOString().slice(0, 10);
+    return `ozzy_exercises_${d}`;
+}
+
+export function getTodayExercises() {
+    return safeParse(localStorage.getItem(exerciseKey())) || [];
+}
+
+export function saveExercise(items) {
+    localStorage.setItem(exerciseKey(), JSON.stringify(items));
+}
+
+export function getDailyExerciseCalories() {
+    return getTodayExercises().reduce((sum, item) => sum + (item.kcalBurned || 0), 0);
+}
+
 // Water
 export function getTodayWater() {
     return parseInt(localStorage.getItem(`ozzy_water_${new Date().toISOString().slice(0, 10)}`) || '0');

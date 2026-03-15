@@ -530,6 +530,14 @@ body {
 }
 
 /* Water tracker with clickable drops */
+.exercise-card {
+    margin: 0 20px;
+    padding: 16px 20px;
+    background: var(--primary-light);
+    border-radius: var(--r-lg);
+    cursor: pointer;
+}
+
 .water-tracker {
     margin: 12px 20px;
     padding: 16px;
