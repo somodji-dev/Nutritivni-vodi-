@@ -3,6 +3,26 @@ import { navigate } from '../router.js';
 import { getProfile, saveProfile, saveResults, clearAll } from '../data-store.js';
 import { calcAllResults } from '../calculator.js';
 
+function ozzyConfirm({ icon = '⚠️', title, desc, confirmText = 'Potvrdi', cancelText = 'Odustani', confirmColor = 'var(--primary)', onConfirm }) {
+    const overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;padding:0 32px;z-index:1000;';
+    overlay.innerHTML = `
+        <div style="background:#fff;border-radius:24px;padding:28px;display:flex;flex-direction:column;align-items:center;gap:20px;width:100%;max-width:340px;">
+            <div style="width:64px;height:64px;border-radius:50%;background:#FFF3E0;display:flex;align-items:center;justify-content:center;font-size:32px;">${icon}</div>
+            <div style="font-family:Poppins,sans-serif;font-size:20px;font-weight:700;color:#1A1F3A;text-align:center;">${title}</div>
+            <div style="font-family:Poppins,sans-serif;font-size:14px;color:#666;line-height:1.5;text-align:center;">${desc}</div>
+            <div style="display:flex;gap:12px;width:100%;">
+                <button class="ozzy-cancel" style="flex:1;height:48px;border-radius:12px;background:#F5F5F5;border:none;font-family:Poppins,sans-serif;font-size:16px;font-weight:600;color:#666;cursor:pointer;">${cancelText}</button>
+                <button class="ozzy-confirm" style="flex:1;height:48px;border-radius:12px;background:${confirmColor};border:none;font-family:Poppins,sans-serif;font-size:16px;font-weight:600;color:#fff;cursor:pointer;">${confirmText}</button>
+            </div>
+        </div>
+    `;
+    overlay.querySelector('.ozzy-cancel').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('.ozzy-confirm').addEventListener('click', () => { overlay.remove(); onConfirm(); });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    document.body.appendChild(overlay);
+}
+
 const GOAL_OPTIONS = ['Smršaj', 'Nabildaj se', 'Ostani fit'];
 const GENDER_OPTIONS = ['Muško', 'Žensko'];
 const ACTIVITY_OPTIONS = ['Sedeći', 'Lagano aktivan/na', 'Umereno aktivan/na', 'Veoma aktivan/na'];
@@ -201,18 +221,30 @@ export function renderProfile(container) {
         });
 
         screen.querySelector('.profile-btn.retry').addEventListener('click', () => {
-            if (confirm('Ponovo ćeš proći kviz. Obroci za danas ostaju sačuvani.')) {
-                // Keep profile for pre-fill but remove results
-                localStorage.removeItem('ozzy_results');
-                navigate('quiz', { step: '1' });
-            }
+            ozzyConfirm({
+                icon: '🔄',
+                title: 'Ponovi kviz?',
+                desc: 'Tvoji rezultati će biti preračunati na osnovu novih odgovora. Uneti obroci za danas ostaju sačuvani.',
+                confirmText: 'Ponovi',
+                onConfirm: () => {
+                    localStorage.removeItem('ozzy_results');
+                    navigate('quiz', { step: '1' });
+                }
+            });
         });
 
         screen.querySelector('.profile-btn.delete').addEventListener('click', () => {
-            if (confirm('Da li si siguran? Svi podaci će biti obrisani.')) {
-                clearAll();
-                navigate('landing');
-            }
+            ozzyConfirm({
+                icon: '🗑️',
+                title: 'Obriši sve podatke?',
+                desc: 'Svi tvoji podaci, rezultati i uneti obroci će biti trajno obrisani.',
+                confirmText: 'Obriši',
+                confirmColor: '#E53935',
+                onConfirm: () => {
+                    clearAll();
+                    navigate('landing');
+                }
+            });
         });
     }
 
