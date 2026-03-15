@@ -1,6 +1,6 @@
 // ========== Exercise Input Screen (Pencil: dpw2J) ==========
 import { navigate } from '../router.js';
-import { getTodayExercises, saveExercise, isAIDisclaimerAccepted, acceptAIDisclaimer } from '../data-store.js';
+import { getTodayExercises, saveExercise, isAIDisclaimerAccepted, acceptAIDisclaimer, getProfile } from '../data-store.js';
 
 export function renderExerciseInput(container) {
     let exerciseItems = [...getTodayExercises()];
@@ -50,7 +50,7 @@ export function renderExerciseInput(container) {
                 <div style="padding:12px 20px 0;">
                     <p style="font-size:14px; font-weight:600; color:var(--text-dark);">Prepoznate aktivnosti (${exerciseItems.length})</p>
                 </div>
-                <div id="exerciseList" style="padding:8px 20px; display:flex; flex-direction:column; gap:8px; overflow-y:auto; flex:1;">
+                <div id="exerciseList" style="padding:8px 20px; display:flex; flex-direction:column; gap:8px;">
                     ${exerciseItems.map((item, i) => renderExerciseCard(item, i)).join('')}
                 </div>
             ` : '<div style="flex:1;"></div>'}
@@ -119,10 +119,17 @@ export function renderExerciseInput(container) {
         btn.innerHTML = '<div class="spinner" style="width:20px; height:20px; border-width:2px;"></div> Analiziram...';
 
         try {
+            const profile = getProfile();
             const resp = await fetch('/api/analyze-exercise', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text: input })
+                body: JSON.stringify({
+                    text: input,
+                    weight: profile?.weight,
+                    height: profile?.height,
+                    gender: profile?.gender,
+                    age: profile?.age
+                })
             });
             if (!resp.ok) {
                 const err = await resp.json().catch(() => ({}));
@@ -153,15 +160,22 @@ export function renderExerciseInput(container) {
     container.appendChild(screen);
 }
 
+const SVG_EXERCISE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>';
+
 function renderExerciseCard(item, idx) {
     return `
         <div class="food-card">
             <div class="food-card-header">
-                <span class="food-emoji">${item.emoji || '🏃'}</span>
+                <span class="food-emoji" style="display:flex;">${SVG_EXERCISE}</span>
                 <span class="food-name">${item.name}${item.duration ? ' (' + item.duration + ')' : ''}</span>
                 <span class="food-kcal">${item.kcalBurned} kcal</span>
                 <button class="exercise-remove" data-idx="${idx}" style="background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:16px; padding:4px;">✕</button>
             </div>
+            ${item.calculationNote ? `
+            <div class="food-card-details" style="flex-wrap:wrap;">
+                <span style="font-family:var(--font-numbers); font-size:12px; color:var(--text-light);">${item.calculationNote} = ${item.kcalBurned} kcal</span>
+            </div>
+            ` : ''}
         </div>
     `;
 }

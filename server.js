@@ -83,11 +83,15 @@ Pravila:
 
 // API: Analyze exercise using Claude Haiku 4.5
 app.post('/api/analyze-exercise', async (req, res) => {
-    const { text } = req.body;
+    const { text, weight, height, gender, age } = req.body;
     if (!text) return res.status(400).json({ error: 'No text provided' });
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY not set' });
+
+    const userWeight = weight || 75;
+    const genderStr = gender === 'Muško' ? 'muški' : gender === 'Žensko' ? 'ženski' : 'nepoznat';
+    const userInfo = `Korisnik: ${genderStr}, ${age || 30} godina, ${userWeight}kg, ${height || 175}cm.`;
 
     try {
         const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -101,15 +105,18 @@ app.post('/api/analyze-exercise', async (req, res) => {
                 model: 'claude-haiku-4-5-20251001',
                 max_tokens: 1024,
                 system: `Ti si fitnes asistent. Korisnik unosi fizičku aktivnost na srpskom jeziku.
+${userInfo}
 Vrati JSON niz sa prepoznatim aktivnostima. Svaka aktivnost ima:
 - name: string (srpski naziv)
 - duration: string (trajanje, npr "30 min", "1 sat")
 - emoji: string (1 emoji za tu aktivnost)
-- kcalBurned: number (procenjene potrošene kalorije za prosečnu osobu od 75kg)
+- kcalBurned: number (procenjene potrošene kalorije prilagođene težini i polu korisnika)
+- calculationNote: string (kratka formula, npr "MET 7.0 × ${userWeight}kg × 0.5h")
 
 Pravila:
+- Koristi MET vrednosti za kalkulaciju: kcal = MET × težina(kg) × trajanje(h)
 - Ako korisnik ne navede trajanje, pretpostavi 30 minuta
-- Kalorije moraju biti realne za navedeno trajanje i intenzitet
+- Kalorije moraju biti realne za navedeno trajanje, intenzitet i podatke korisnika
 - Prepoznaj aktivnosti na srpskom (trčanje, šetnja, teretana, plivanje, bicikl, vožnja bicikla, čučnjevi, sklekovi, yoga, fudbal, košarka, itd.)
 - Vrati SAMO validan JSON niz, bez dodatnog teksta ili markdown-a.`,
                 messages: [{ role: 'user', content: text }]
