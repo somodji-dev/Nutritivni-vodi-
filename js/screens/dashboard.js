@@ -10,6 +10,16 @@ const SVG = {
     heart: '<svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>',
     waterDrop: '<svg width="24" height="28" viewBox="0 0 24 28" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
     waterDropFilled: '<svg width="24" height="28" viewBox="0 0 24 28" fill="var(--blue)" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>',
+    // Exercise icons
+    exerciseRun: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="4" r="2"/><path d="M15.59 13.51l-1.16-2.65a2.38 2.38 0 0 0-1.6-1.38l-2.21-.55a1.69 1.69 0 0 0-1.87.74L7 12.5"/><path d="m14 16.5-2.5-3.5L8 17l-3-1"/><path d="m17 14 2.78 5.14A1.3 1.3 0 0 1 18.64 21H17"/><path d="M8 17l-1.59 4.45A1.23 1.23 0 0 0 7.57 23h1.17"/></svg>',
+    exerciseWalk: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M13.5 8.5 15 12l-3 3 1.5 5.5"/><path d="M10.5 8.5 9 12l3 3-1.5 5.5"/></svg>',
+    exerciseSwim: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 18c2-1 4 1 6 0s4-1 6 0 4 1 6 0"/><path d="M2 22c2-1 4 1 6 0s4-1 6 0 4 1 6 0"/><circle cx="9" cy="7" r="2"/><path d="m9 9 2 4 5-3"/></svg>',
+    exerciseBike: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>',
+    exerciseStrength: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>',
+    exerciseYoga: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M12 6v4"/><path d="m8 14 4-4 4 4"/><path d="M6 18h12"/><path d="M12 10v8"/></svg>',
+    exerciseBall: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>',
+    exerciseDefault: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>',
+    exerciseHeader: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>',
     // Meal icons
     sun: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
     cloudSun: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6z"/></svg>',
@@ -19,6 +29,18 @@ const SVG = {
     chevronRight: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
     plus: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'
 };
+
+function getExerciseIcon(name) {
+    const n = (name || '').toLowerCase();
+    if (/trč|sprint|jogging/.test(n)) return SVG.exerciseRun;
+    if (/šetn|hodanj/.test(n)) return SVG.exerciseWalk;
+    if (/plivan/.test(n)) return SVG.exerciseSwim;
+    if (/bicikl|bajk|cycling/.test(n)) return SVG.exerciseBike;
+    if (/teretan|sklek|čučn|bench|deadlift|squat|zgib|bučic|press/.test(n)) return SVG.exerciseStrength;
+    if (/yoga|pilates|stretc|istezanj/.test(n)) return SVG.exerciseYoga;
+    if (/fudbal|košark|odbojk|tenis|rukomet|ping|badminton/.test(n)) return SVG.exerciseBall;
+    return SVG.exerciseDefault;
+}
 
 export function renderDashboard(container) {
     const profile = getProfile();
@@ -102,13 +124,13 @@ export function renderDashboard(container) {
             <div class="exercise-card" id="exerciseCard">
                 <div style="display:flex; align-items:center; justify-content:space-between;">
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:18px;">🏃</span>
+                        <span style="display:flex;">${SVG.exerciseHeader}</span>
                         <span style="font-size:13px; font-weight:600; color:var(--text-dark);">Današnja vežba</span>
                     </div>
                     <span style="font-family:var(--font-numbers); font-size:14px; font-weight:700; color:var(--primary);">${exerciseCals} kcal</span>
                 </div>
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-top:8px;">
-                    <span style="font-size:12px; color:var(--text-light);">${exercises.length > 0 ? exercises.map(e => e.emoji + ' ' + e.name + (e.duration ? ' ' + e.duration : '')).join('  ') : 'Dodaj vežbu'}</span>
+                    <span style="font-size:12px; color:var(--text-light); display:flex; align-items:center; gap:6px; flex-wrap:wrap;">${exercises.length > 0 ? exercises.map(e => '<span style="display:inline-flex; align-items:center; gap:3px;">' + getExerciseIcon(e.name) + ' ' + e.name + (e.duration ? ' ' + e.duration : '') + '</span>').join('') : 'Dodaj vežbu'}</span>
                     <div style="width:28px; height:28px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; cursor:pointer;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
                     </div>
