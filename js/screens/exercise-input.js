@@ -224,7 +224,15 @@ function showAIDisclaimer(screen, onAccept) {
                 <span>⚠️</span>
                 <span>Ova aplikacija nije zamena za stručni medicinski ili nutricionistički savet.</span>
             </div>
-            <button class="btn btn-primary" style="margin-top:8px;" id="acceptAI">Razumem, nastavi</button>
+            <div style="background:var(--bg-light); border-radius:var(--r-md); padding:12px 16px; margin:0 0 16px; text-align:left;">
+                <p style="font-size:13px; font-weight:600; color:var(--text-dark); margin-bottom:6px;">💡 Kako koristiti?</p>
+                <p style="font-size:12px; color:var(--text-light); line-height:1.5;">Opiši svoju aktivnost prirodnim jezikom.</p>
+                <p style="font-size:12px; color:var(--text-muted); font-style:italic; margin-top:6px; line-height:1.5;">
+                    „Trčanje 30 minuta"<br>
+                    „Teretana sat vremena, bench press i čučnjevi"
+                </p>
+            </div>
+            <button class="btn btn-primary" style="margin-top:0;" id="acceptAI">Razumem, nastavi</button>
         </div>
     `;
 

@@ -25,7 +25,6 @@ function ozzyConfirm({ icon = '⚠️', title, desc, confirmText = 'Potvrdi', ca
 
 const GOAL_OPTIONS = ['Smršaj', 'Nabildaj se', 'Ostani fit'];
 const GENDER_OPTIONS = ['Muško', 'Žensko'];
-const ACTIVITY_OPTIONS = ['Sedeći', 'Lagano aktivan/na', 'Umereno aktivan/na', 'Veoma aktivan/na'];
 const DIET_OPTIONS = ['Jedem sve', 'Low Carb', 'Biljni fokus', 'Paleo / Clean'];
 const TEMPO_OPTIONS = ['Turbo', 'Stabilno', 'Opušteno'];
 
@@ -172,9 +171,6 @@ export function renderProfile(container) {
         }));
         rows.appendChild(makeRow('Težina', data.weight + ' kg', () => {
             showNumberInput(screen, 'Tvoja težina', 'kg', data.weight, 20, 300, v => { data.weight = v; render(); });
-        }));
-        rows.appendChild(makeRow('Aktivnost', data.activityLevel?.replace('/na', ''), () => {
-            showOptionPicker(screen, 'Nivo aktivnosti', ACTIVITY_OPTIONS, data.activityLevel, v => { data.activityLevel = v; render(); });
         }));
         rows.appendChild(makeRow('Ciljna težina', data.targetWeight + ' kg', () => {
             showNumberInput(screen, 'Ciljna težina', 'kg', data.targetWeight, 20, 300, v => { data.targetWeight = v; render(); });

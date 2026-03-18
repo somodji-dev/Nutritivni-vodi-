@@ -1,6 +1,6 @@
 // ========== Dashboard Screen (Pencil: 9oPY4) ==========
 import { navigate } from '../router.js';
-import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises } from '../data-store.js';
+import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises, isDashboardOnboardingSeen, setDashboardOnboardingSeen } from '../data-store.js';
 import { calcBMI, getBMICategory, calcMealCalories, calcWater, MACRO_SPLITS } from '../calculator.js';
 
 // SVG Icons matching Pencil design
@@ -164,6 +164,18 @@ export function renderDashboard(container) {
                 </div>
             </div>
 
+            <!-- OZZY Proizvod -->
+            <div id="ozzyProductBtn" style="margin:0 20px 16px; padding:14px 20px; border:2px solid var(--primary-light); border-radius:var(--r-xl); cursor:pointer; display:flex; align-items:center; gap:12px; background:white;">
+                <div style="width:40px; height:40px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
+                <div style="flex:1;">
+                    <span style="font-size:14px; font-weight:600; color:var(--text-dark);">Upoznaj OZZY</span>
+                    <p style="font-size:11px; color:var(--text-light); margin-top:2px;">Saznaj više o proizvodu</p>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </div>
+
             <!-- Footer -->
             <div class="dash-footer">
                 Powered by Ozzy NutriFon<br>
@@ -186,6 +198,12 @@ export function renderDashboard(container) {
             });
         });
 
+        // OZZY product button (placeholder)
+        screen.querySelector('#ozzyProductBtn')?.addEventListener('click', () => {
+            // TODO: Zameniti sa eksternim URL-om ili internim ekranom
+            alert('Uskoro: više o OZZY proizvodu!');
+        });
+
         // Water drop click handlers
         screen.querySelectorAll('.water-drop-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -204,6 +222,77 @@ export function renderDashboard(container) {
 
     renderScreen();
     container.appendChild(screen);
+
+    // Onboarding overlay — prikaži samo pri prvom otvaranju dashboarda
+    if (!isDashboardOnboardingSeen()) {
+        showDashboardOnboarding(screen);
+    }
+}
+
+function showDashboardOnboarding(screen) {
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.style.cssText = 'align-items:center; justify-content:center;';
+    overlay.innerHTML = `
+        <div style="background:white; border-radius:24px; padding:28px 24px; max-width:320px; width:90%; text-align:center;">
+            <div style="width:56px; height:56px; border-radius:50%; background:var(--primary-light); margin:0 auto 16px; display:flex; align-items:center; justify-content:center;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            </div>
+            <h3 style="font-size:20px; font-weight:700; color:var(--text-dark); margin-bottom:16px;">Dobrodošao u Ozzy!</h3>
+
+            <div style="text-align:left; display:flex; flex-direction:column; gap:12px;">
+                <div style="display:flex; align-items:flex-start; gap:10px;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <span style="font-size:13px; font-weight:700; color:var(--primary);">1</span>
+                    </div>
+                    <div>
+                        <p style="font-size:13px; font-weight:600; color:var(--text-dark);">Kalorijski cilj</p>
+                        <p style="font-size:12px; color:var(--text-light);">Prati koliko kalorija imaš za danas</p>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:flex-start; gap:10px;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <span style="font-size:13px; font-weight:700; color:var(--primary);">2</span>
+                    </div>
+                    <div>
+                        <p style="font-size:13px; font-weight:600; color:var(--text-dark);">Dodaj obroke</p>
+                        <p style="font-size:12px; color:var(--text-light);">Tapni na Doručak, Ručak, Večeru ili Užinu</p>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:flex-start; gap:10px;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <span style="font-size:13px; font-weight:700; color:var(--primary);">3</span>
+                    </div>
+                    <div>
+                        <p style="font-size:13px; font-weight:600; color:var(--text-dark);">Prati vežbe</p>
+                        <p style="font-size:12px; color:var(--text-light);">Unesi aktivnosti i vidi potrošene kalorije</p>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:flex-start; gap:10px;">
+                    <div style="width:28px; height:28px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <span style="font-size:13px; font-weight:700; color:var(--primary);">4</span>
+                    </div>
+                    <div>
+                        <p style="font-size:13px; font-weight:600; color:var(--text-dark);">Unos vode</p>
+                        <p style="font-size:12px; color:var(--text-light);">Tapni na kapljice da pratiš hidrataciju</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" style="margin-top:20px; width:100%;" id="onboardingDone">Razumem!</button>
+        </div>
+    `;
+
+    overlay.querySelector('#onboardingDone').addEventListener('click', () => {
+        setDashboardOnboardingSeen();
+        overlay.remove();
+    });
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); setDashboardOnboardingSeen(); });
+
+    screen.appendChild(overlay);
 }
 
 function renderMacroCard(label, consumed, target, color) {
@@ -255,11 +344,12 @@ function showCaloriesPopup(screen, profile, results, exerciseCals = 0) {
             <div class="formula-step">
                 <div style="display:flex; align-items:center;">
                     <span class="step-num" style="background:var(--blue);">2</span>
-                    <span class="step-title">Dnevna potrošnja (TDEE)</span>
+                    <span class="step-title">Bazalna dnevna potrošnja (TDEE)</span>
                 </div>
-                <p class="step-formula">BMR × faktor aktivnosti (${profile.activityLevel || 'Umereno aktivan/na'} = ${({'Sedeći':1.2,'Lagano aktivan/na':1.375,'Umereno aktivan/na':1.55,'Veoma aktivan/na':1.725})[profile.activityLevel] || 1.55})</p>
-                <p class="step-calc">${results.bmr} × ${({'Sedeći':1.2,'Lagano aktivan/na':1.375,'Umereno aktivan/na':1.55,'Veoma aktivan/na':1.725})[profile.activityLevel] || 1.55}</p>
+                <p class="step-formula">BMR × bazalni faktor (1.2)</p>
+                <p class="step-calc">${results.bmr} × 1.2</p>
                 <p class="step-result" style="color:var(--blue);">= ${results.tdee} kcal</p>
+                <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">Vežbe se dodaju posebno kroz unos aktivnosti.</p>
             </div>
 
             <div class="formula-step">

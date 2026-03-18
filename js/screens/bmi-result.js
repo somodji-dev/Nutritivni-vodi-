@@ -92,7 +92,7 @@ export function renderBMIResult(container) {
     `;
 
     screen.querySelector('#bmiBack').addEventListener('click', () => navigate('quiz', { step: '5' }));
-    screen.querySelector('#bmiVozzy').addEventListener('click', () => navigate('quiz', { step: '5b' }));
+    screen.querySelector('#bmiVozzy').addEventListener('click', () => navigate('quiz', { step: '6' }));
 
     container.appendChild(screen);
 }

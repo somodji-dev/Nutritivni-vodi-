@@ -242,7 +242,7 @@ function selectCard(card, container) {
 // ===== Step 1 - Koji je tvoj cilj? =====
 function renderStep1(container) {
     const screen = makeScreen();
-    screen.appendChild(header(1, 8, () => navigate('landing')));
+    screen.appendChild(header(1, 7, () => navigate('landing')));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Koji je tvoj', 'cilj?', 'Hajde da saznamo šta ti treba!'));
     screen.appendChild(spacer());
@@ -284,7 +284,7 @@ function renderStep1(container) {
 // ===== Step 2 - Koji si pol? =====
 function renderStep2(container) {
     const screen = makeScreen();
-    screen.appendChild(header(2, 8, () => navigate('quiz', { step: '1' })));
+    screen.appendChild(header(2, 7, () => navigate('quiz', { step: '1' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Koji si', 'pol?', 'Za precizniji proračun tvog plana!'));
     screen.appendChild(spacer());
@@ -332,7 +332,7 @@ function renderStep2(container) {
 // ===== Step 3 - Koliko imaš godina? =====
 function renderStep3(container) {
     const screen = makeScreen();
-    screen.appendChild(header(3, 8, () => navigate('quiz', { step: '2' }), 'skip', () => {
+    screen.appendChild(header(3, 7, () => navigate('quiz', { step: '2' }), 'skip', () => {
         navigate('quiz', { step: '4' });
     }));
     screen.appendChild(document.createElement('div')).style.height = '12px';
@@ -355,7 +355,7 @@ function renderStep3(container) {
 // ===== Step 4 - Kolika je tvoja visina? =====
 function renderStep4(container) {
     const screen = makeScreen();
-    screen.appendChild(header(4, 8, () => navigate('quiz', { step: '3' })));
+    screen.appendChild(header(4, 7, () => navigate('quiz', { step: '3' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Kolika je tvoja', 'visina?', 'Hajde da vidimo koliko si visok/a!'));
     screen.appendChild(spacer());
@@ -375,7 +375,7 @@ function renderStep4(container) {
 // ===== Step 5 - Tvoja težina danas? =====
 function renderStep5(container) {
     const screen = makeScreen();
-    screen.appendChild(header(5, 8, () => navigate('quiz', { step: '4' })));
+    screen.appendChild(header(5, 7, () => navigate('quiz', { step: '4' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Tvoja težina', 'danas?', 'Koliko kilograma imaš danas?'));
     screen.appendChild(spacer());
@@ -392,68 +392,10 @@ function renderStep5(container) {
     container.appendChild(screen);
 }
 
-// ===== Step 5b - Koliko si fizički aktivan/na? =====
-function renderStep5b(container) {
-    const screen = makeScreen();
-    screen.appendChild(header(6, 8, () => navigate('bmi')));
-    screen.appendChild(document.createElement('div')).style.height = '12px';
-    screen.appendChild(title('Koliko si', 'fizički aktivan/na?', 'Ovo nam pomaže da preciznije izračunamo tvoj dnevni kalorijski cilj.'));
-    screen.appendChild(spacer());
-
-    let selectedActivity = null;
-
-    const options = document.createElement('div');
-    options.style.cssText = 'display:flex; flex-direction:column; gap:12px; padding:0 24px;';
-
-    const ACTIVITY_ICONS = {
-        armchair: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 9V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v3"/><path d="M3 16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5a2 2 0 0 0-4 0v1.5H7V11a2 2 0 0 0-4 0z"/><path d="M5 18v2"/><path d="M19 18v2"/></svg>',
-        footprints: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00A8D8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5 10 7.89 8 10 8 12h0a1.76 1.76 0 0 0 1 2.76A2 2 0 0 1 11 17v1"/><path d="M11 21.95A10 10 0 0 0 14 22c3 0 4.5-3.28 4.53-6 .02-2.5-1.03-3.5-1.03-5.62C17.5 8.8 18.13 7 20 7c1.51 0 2.97 3.28 3 6 .02 2.5-2 4.5-2 6.88V22"/></svg>',
-        bike: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF9500" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18.5" cy="17.5" r="3.5"/><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="15" cy="5" r="1"/><path d="M12 17.5V14l-3-3 4-3 2 3h2"/></svg>',
-        flame: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>'
-    };
-
-    const vozzy = mascotCTA(() => {
-        if (selectedActivity) {
-            setQuizState('activityLevel', selectedActivity);
-            navigate('quiz', { step: '6' });
-        }
-    });
-
-    [
-        { name: 'Sedeći', desc: 'Uglavnom sedim, malo ili nimalo vežbanja', icon: ACTIVITY_ICONS.armchair },
-        { name: 'Lagano aktivan/na', desc: 'Lagana aktivnost 1-3 dana nedeljno', icon: ACTIVITY_ICONS.footprints },
-        { name: 'Umereno aktivan/na', desc: 'Umerena aktivnost 3-5 dana nedeljno', icon: ACTIVITY_ICONS.bike },
-        { name: 'Veoma aktivan/na', desc: 'Intenzivna aktivnost 6-7 dana nedeljno', icon: ACTIVITY_ICONS.flame }
-    ].forEach(a => {
-        const card = document.createElement('div');
-        card.className = 'option-card';
-        card.innerHTML = `
-            <div>
-                <span class="option-name">${a.name}</span>
-                <div class="option-info">
-                    <span style="color:var(--text-light); font-size:11px;">${a.desc}</span>
-                </div>
-            </div>
-            ${a.icon}
-        `;
-        card.addEventListener('click', () => {
-            selectedActivity = a.name;
-            selectCard(card, options);
-            activateVozzy(screen);
-        });
-        options.appendChild(card);
-    });
-
-    screen.appendChild(options);
-    screen.appendChild(spacer());
-    screen.appendChild(vozzy);
-    container.appendChild(screen);
-}
-
 // ===== Step 6 - Tvoja ciljna težina? =====
 function renderStep6(container) {
     const screen = makeScreen();
-    screen.appendChild(header(7, 8, () => navigate('quiz', { step: '5b' })));
+    screen.appendChild(header(6, 7, () => navigate('bmi')));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Tvoja ciljna', 'težina?', 'Gde želiš da stigneš? Mi ćemo ti pomoći!'));
     screen.appendChild(spacer());
@@ -473,7 +415,7 @@ function renderStep6(container) {
 // ===== Step 6b - Šta danas ide u tvoj tanjir? =====
 function renderStep6b(container) {
     const screen = makeScreen();
-    screen.appendChild(header(8, 8, () => navigate('quiz', { step: '6' })));
+    screen.appendChild(header(6, 7, () => navigate('quiz', { step: '6' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Šta danas ide u tvoj', 'tanjir?', 'Izaberi stil ishrane koji ti odgovara!'));
     screen.appendChild(spacer());
@@ -516,7 +458,7 @@ function renderStep6b(container) {
 // ===== Step 7 - Kojim tempom do ciljne težine? =====
 function renderStep7(container) {
     const screen = makeScreen();
-    screen.appendChild(header(8, 8, () => navigate('quiz', { step: '6b' })));
+    screen.appendChild(header(7, 7, () => navigate('quiz', { step: '6b' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Kojim tempom do', 'ciljne težine?', 'Odaberi koliko brzo želiš da stigneš do svoje ciljne težine.'));
     screen.appendChild(spacer());
@@ -570,7 +512,7 @@ function renderStep7(container) {
 }
 
 // ===== Router =====
-const steps = { '1': renderStep1, '2': renderStep2, '3': renderStep3, '4': renderStep4, '5': renderStep5, '5b': renderStep5b, '6': renderStep6, '6b': renderStep6b, '7': renderStep7 };
+const steps = { '1': renderStep1, '2': renderStep2, '3': renderStep3, '4': renderStep4, '5': renderStep5, '6': renderStep6, '6b': renderStep6b, '7': renderStep7 };
 
 export function renderQuiz(container, params = {}) {
     const step = params.step || '1';

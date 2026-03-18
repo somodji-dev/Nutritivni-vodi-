@@ -82,6 +82,10 @@ export function setTodayWater(glasses) {
 export function isAIDisclaimerAccepted() { return !!localStorage.getItem(KEYS.aiDisclaimer); }
 export function acceptAIDisclaimer() { localStorage.setItem(KEYS.aiDisclaimer, 'true'); }
 
+// Dashboard onboarding
+export function isDashboardOnboardingSeen() { return !!localStorage.getItem('ozzy_onboarding_dashboard_seen'); }
+export function setDashboardOnboardingSeen() { localStorage.setItem('ozzy_onboarding_dashboard_seen', 'true'); }
+
 // Quiz state (sessionStorage)
 export function getQuizState() {
     return safeParse(sessionStorage.getItem('ozzy_quiz_state')) || {};

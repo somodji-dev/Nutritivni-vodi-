@@ -20,6 +20,11 @@ export function renderLanding(container) {
 
         <button class="btn btn-primary" id="startBtn">Izračunaj dnevni dozzy</button>
 
+        <button id="ozzyProductBtn" style="margin-top:12px; background:none; border:2px solid var(--primary-light); border-radius:var(--r-xl); padding:12px 24px; cursor:pointer; font-family:Poppins,sans-serif; font-size:14px; font-weight:600; color:var(--primary); width:100%; display:flex; align-items:center; justify-content:center; gap:8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            Upoznaj OZZY
+        </button>
+
         <div style="height:16px;"></div>
 
         <p style="font-size:14px; font-weight:600; text-align:center; color:var(--text-dark);">Kalkulator dnevnih nutritivnih potreba</p>
@@ -35,6 +40,11 @@ export function renderLanding(container) {
 
     screen.querySelector('#startBtn').addEventListener('click', () => {
         navigate('quiz', { step: '1' });
+    });
+
+    screen.querySelector('#ozzyProductBtn').addEventListener('click', () => {
+        // TODO: Zameniti sa eksternim URL-om ili internim ekranom
+        alert('Uskoro: više o OZZY proizvodu!');
     });
 
     container.appendChild(screen);

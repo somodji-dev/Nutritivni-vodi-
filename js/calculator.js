@@ -1,12 +1,7 @@
 // ========== Nutrition Calculator ==========
 
-export const ACTIVITY_FACTORS = {
-    'Sedentaran': 1.2,
-    'Lagano aktivan': 1.375,
-    'Umereno aktivan': 1.55,
-    'Veoma aktivan': 1.725,
-    'Ekstra aktivan': 1.9
-};
+// Bazalni faktor aktivnosti (sedeći) — vežbe se dodaju eksplicitno kroz unos
+export const BASELINE_ACTIVITY_FACTOR = 1.2;
 
 export const DEFICIT_MAP = {
     'Turbo': 750,
@@ -49,22 +44,9 @@ export function calcBMR(gender, weightKg, heightCm, age) {
     return 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
 }
 
-// TDEE
-export function calcTDEE(bmr, activityLevel = 'Umereno aktivan/na') {
-    // Map quiz answers to factor keys
-    const factorMap = {
-        'Sedeći': 1.2,
-        'Lagano aktivan/na': 1.375,
-        'Umereno aktivan/na': 1.55,
-        'Veoma aktivan/na': 1.725,
-        // Legacy keys
-        'Sedentaran': 1.2,
-        'Lagano aktivan': 1.375,
-        'Umereno aktivan': 1.55,
-        'Veoma aktivan': 1.725,
-        'Ekstra aktivan': 1.9
-    };
-    return bmr * (factorMap[activityLevel] || 1.55);
+// TDEE — bazalni (sedeći × 1.2), vežbe se dodaju eksplicitno na dashboardu
+export function calcTDEE(bmr) {
+    return bmr * BASELINE_ACTIVITY_FACTOR;
 }
 
 // Calorie goal
@@ -117,7 +99,7 @@ export function calcAllResults(profile) {
     const age = Math.max(profile.age || 25, 10);
 
     const bmr = calcBMR(profile.gender, weight, height, age);
-    const tdee = calcTDEE(bmr, profile.activityLevel);
+    const tdee = calcTDEE(bmr);
     let calories = calcCalorieGoal(tdee, profile.goal, profile.tempo);
     // Never go below minimum safe calories
     calories = Math.max(calories, MIN_CALORIES);
