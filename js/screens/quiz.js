@@ -478,9 +478,9 @@ function renderStep7(container) {
     });
 
     [
-        { name: 'Turbo', desc: 'Intenzivno', weeks: '~4 nedelje', rate: '~1.5kg/ned', icon: ICONS.zap, color: '#FF9500' },
-        { name: 'Stabilno', desc: 'Umereno', weeks: '~8 nedelja', rate: '~0.75kg/ned', icon: ICONS.lightbulb, color: '#00A8D8' },
-        { name: 'Opušteno', desc: 'Lagano', weeks: '~16 nedelja', rate: '~0.4kg/ned', icon: ICONS.thumbsUp, color: '#4CAF50' }
+        { name: 'Turbo', desc: 'Intenzivno', rate: '~0.7 kg/ned', icon: ICONS.zap, color: '#FF9500' },
+        { name: 'Stabilno', desc: 'Umereno', rate: '~0.45 kg/ned', icon: ICONS.lightbulb, color: '#00A8D8' },
+        { name: 'Opušteno', desc: 'Lagano', rate: '~0.23 kg/ned', icon: ICONS.thumbsUp, color: '#4CAF50' }
     ].forEach(t => {
         const card = document.createElement('div');
         card.className = 'option-card';
@@ -489,8 +489,6 @@ function renderStep7(container) {
                 <span class="option-name">${t.name}</span>
                 <div class="option-info">
                     <span style="color:${t.color}; font-weight:600;">${t.desc}</span>
-                    <span style="color:var(--text-muted);">—</span>
-                    <span style="color:var(--text-light);">${t.weeks}</span>
                     <span style="color:var(--text-muted);">—</span>
                     <span style="color:var(--text-light);">${t.rate}</span>
                 </div>

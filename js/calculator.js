@@ -81,11 +81,16 @@ export function calcMealCalories(totalCalories) {
     };
 }
 
-// Weeks to goal
-export function calcWeeksToGoal(currentWeight, targetWeight, tempo) {
+// Weeks to goal — izračunato iz efektivnog deficita (1 kg masti ≈ 7700 kcal)
+export function calcWeeksToGoal(currentWeight, targetWeight, tempo, tdee, calories) {
     const diff = Math.abs(currentWeight - targetWeight);
-    const ratePerWeek = { 'Turbo': 1.5, 'Stabilno': 0.75, 'Opušteno': 0.4 };
-    return Math.ceil(diff / (ratePerWeek[tempo] || 0.75));
+    if (diff === 0) return 0;
+    // Efektivni deficit = razlika izmedju TDEE i kalorijskog cilja (uzima u obzir MIN_CALORIES limit)
+    const effectiveDeficit = Math.abs(tdee - calories);
+    if (effectiveDeficit === 0) return 0;
+    // 7700 kcal = 1 kg masti, deficit × 7 = nedeljni deficit
+    const weeksNeeded = (diff * 7700) / (effectiveDeficit * 7);
+    return Math.ceil(weeksNeeded);
 }
 
 // Minimum safe calories
@@ -107,7 +112,7 @@ export function calcAllResults(profile) {
     const water = calcWater(weight);
     const bmi = height > 0 ? calcBMI(weight, height) : 0;
     const mealCals = calcMealCalories(calories);
-    const weeks = calcWeeksToGoal(weight, profile.targetWeight || weight, profile.tempo);
+    const weeks = calcWeeksToGoal(weight, profile.targetWeight || weight, profile.tempo, tdee, calories);
 
     return { bmr: Math.round(bmr), tdee: Math.round(tdee), calories: Math.round(calories), macros, water, bmi, mealCals, weeks };
 }
