@@ -1,5 +1,5 @@
 // OZZY Service Worker — enables PWA install & offline caching
-const CACHE_NAME = 'ozzy-v2';
+const CACHE_NAME = 'ozzy-v3';
 const STATIC_ASSETS = [
     '/',
     '/index.html',

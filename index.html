@@ -41,9 +41,16 @@
     <div id="app"></div>
     <script type="module" src="js/app.js?v=6"></script>
     <script>
-        // Register Service Worker for PWA
+        // Register Service Worker for PWA with auto-update
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(() => {});
+            navigator.serviceWorker.register('/sw.js').then(reg => {
+                // Check for updates every 60 seconds (important for standalone PWA)
+                setInterval(() => reg.update(), 60000);
+            }).catch(() => {});
+            // Auto-reload when new SW takes over
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                window.location.reload();
+            });
         }
         // Capture install prompt for later use
         window.__pwaInstallPrompt = null;
