@@ -414,8 +414,11 @@ function renderStep6(container) {
 
 // ===== Step 6b - Šta danas ide u tvoj tanjir? =====
 function renderStep6b(container) {
+    const quiz = getQuizState();
+    const isOstaniFit = quiz.goal === 'Ostani fit';
     const screen = makeScreen();
-    screen.appendChild(header(6, 7, () => navigate('quiz', { step: '6' })));
+    // Back: za "Ostani fit" vrati na BMI (preskočili smo step 6), inače na step 6
+    screen.appendChild(header(isOstaniFit ? 6 : 6, 7, () => navigate(isOstaniFit ? 'bmi' : 'quiz', isOstaniFit ? {} : { step: '6' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Šta danas ide u tvoj', 'tanjir?', 'Izaberi stil ishrane koji ti odgovara!'));
     screen.appendChild(spacer());
@@ -428,7 +431,16 @@ function renderStep6b(container) {
     const vozzy = mascotCTA(() => {
         if (selectedDiet) {
             setQuizState('dietType', selectedDiet);
-            navigate('quiz', { step: '7' });
+            if (isOstaniFit) {
+                // Preskoči tempo — direktno sačuvaj i idi na loading
+                const profile = getQuizState();
+                profile.dietType = selectedDiet;
+                profile.tempo = 'Stabilno';
+                saveProfile(profile);
+                navigate('loading');
+            } else {
+                navigate('quiz', { step: '7' });
+            }
         }
     });
 
@@ -457,6 +469,10 @@ function renderStep6b(container) {
 
 // ===== Step 7 - Kojim tempom do ciljne težine? =====
 function renderStep7(container) {
+    const quiz = getQuizState();
+    const isGain = quiz.goal === 'Nabildaj se';
+    const sign = isGain ? '+' : '−';
+
     const screen = makeScreen();
     screen.appendChild(header(7, 7, () => navigate('quiz', { step: '6b' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
@@ -477,11 +493,18 @@ function renderStep7(container) {
         }
     });
 
-    [
-        { name: 'Turbo', desc: 'Intenzivno', rate: '~0.7 kg/ned', icon: ICONS.zap, color: '#FF9500' },
-        { name: 'Stabilno', desc: 'Umereno', rate: '~0.45 kg/ned', icon: ICONS.lightbulb, color: '#00A8D8' },
-        { name: 'Opušteno', desc: 'Lagano', rate: '~0.23 kg/ned', icon: ICONS.thumbsUp, color: '#4CAF50' }
-    ].forEach(t => {
+    // Stope prilagođene cilju: deficit za Smršaj, suficit za Nabildaj se
+    const tempos = isGain ? [
+        { name: 'Turbo', desc: 'Intenzivno', rate: `${sign}0.45 kg/ned`, icon: ICONS.zap, color: '#FF9500' },
+        { name: 'Stabilno', desc: 'Umereno', rate: `${sign}0.32 kg/ned`, icon: ICONS.lightbulb, color: '#00A8D8' },
+        { name: 'Opušteno', desc: 'Lagano', rate: `${sign}0.23 kg/ned`, icon: ICONS.thumbsUp, color: '#4CAF50' }
+    ] : [
+        { name: 'Turbo', desc: 'Intenzivno', rate: `${sign}0.7 kg/ned`, icon: ICONS.zap, color: '#FF9500' },
+        { name: 'Stabilno', desc: 'Umereno', rate: `${sign}0.45 kg/ned`, icon: ICONS.lightbulb, color: '#00A8D8' },
+        { name: 'Opušteno', desc: 'Lagano', rate: `${sign}0.23 kg/ned`, icon: ICONS.thumbsUp, color: '#4CAF50' }
+    ];
+
+    tempos.forEach(t => {
         const card = document.createElement('div');
         card.className = 'option-card';
         card.innerHTML = `

@@ -424,15 +424,37 @@ function showCaloriesPopup(screen, profile, results, exerciseCals = 0) {
                 <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">Vežbe se dodaju posebno kroz unos aktivnosti.</p>
             </div>
 
+            ${profile.goal === 'Ostani fit' ? `
             <div class="formula-step">
                 <div style="display:flex; align-items:center;">
                     <span class="step-num" style="background:var(--green);">3</span>
                     <span class="step-title">Tvoj kalorijski cilj</span>
                 </div>
-                <p class="step-formula">TDEE - deficit (cilj: ${profile.goal}, tempo: ${profile.tempo})</p>
-                <p class="step-calc">${results.tdee} - ${results.tdee - results.calories} (${profile.tempo.toLowerCase()})</p>
+                <p class="step-formula">Cilj: održavanje težine</p>
+                <p class="step-calc">TDEE = kalorijski cilj</p>
                 <p class="step-result" style="color:var(--green);">= ${results.calories} kcal dnevno</p>
             </div>
+            ` : profile.goal === 'Nabildaj se' ? `
+            <div class="formula-step">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:var(--green);">3</span>
+                    <span class="step-title">Tvoj kalorijski cilj</span>
+                </div>
+                <p class="step-formula">TDEE + suficit (cilj: ${profile.goal}, tempo: ${profile.tempo})</p>
+                <p class="step-calc">${results.tdee} + ${results.calories - results.tdee} (${profile.tempo.toLowerCase()})</p>
+                <p class="step-result" style="color:var(--green);">= ${results.calories} kcal dnevno</p>
+            </div>
+            ` : `
+            <div class="formula-step">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:var(--green);">3</span>
+                    <span class="step-title">Tvoj kalorijski cilj</span>
+                </div>
+                <p class="step-formula">TDEE − deficit (cilj: ${profile.goal}, tempo: ${profile.tempo})</p>
+                <p class="step-calc">${results.tdee} − ${results.tdee - results.calories} (${profile.tempo.toLowerCase()})</p>
+                <p class="step-result" style="color:var(--green);">= ${results.calories} kcal dnevno</p>
+            </div>
+            `}
 
             ${exerciseCals > 0 ? `
             <div class="formula-step">
