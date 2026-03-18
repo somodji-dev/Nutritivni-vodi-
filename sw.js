@@ -1,5 +1,5 @@
 // OZZY Service Worker — enables PWA install & offline caching
-const CACHE_NAME = 'ozzy-v1';
+const CACHE_NAME = 'ozzy-v2';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -47,23 +47,21 @@ self.addEventListener('fetch', event => {
         return;
     }
 
-    // Static assets: cache first, fallback to network
+    // Network first, cache fallback (ensures fresh code after deploy)
     event.respondWith(
-        caches.match(event.request).then(cached => {
-            if (cached) return cached;
-            return fetch(event.request).then(response => {
-                // Cache new static resources
-                if (response.ok && event.request.method === 'GET') {
-                    const clone = response.clone();
-                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-                }
-                return response;
-            });
-        }).catch(() => {
-            // Offline fallback
-            if (event.request.mode === 'navigate') {
-                return caches.match('/index.html');
+        fetch(event.request).then(response => {
+            if (response.ok && event.request.method === 'GET') {
+                const clone = response.clone();
+                caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
             }
+            return response;
+        }).catch(() => {
+            return caches.match(event.request).then(cached => {
+                if (cached) return cached;
+                if (event.request.mode === 'navigate') {
+                    return caches.match('/index.html');
+                }
+            });
         })
     );
 });

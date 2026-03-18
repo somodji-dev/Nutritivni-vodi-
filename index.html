@@ -45,6 +45,17 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js').catch(() => {});
         }
+        // Capture install prompt for later use
+        window.__pwaInstallPrompt = null;
+        window.__pwaInstalled = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            window.__pwaInstallPrompt = e;
+        });
+        window.addEventListener('appinstalled', () => {
+            window.__pwaInstalled = true;
+            window.__pwaInstallPrompt = null;
+        });
     </script>
 </body>
 </html>

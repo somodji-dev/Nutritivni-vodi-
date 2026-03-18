@@ -1,6 +1,6 @@
 // ========== Dashboard Screen (Pencil: 9oPY4) ==========
 import { navigate } from '../router.js';
-import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises, isDashboardOnboardingSeen, setDashboardOnboardingSeen } from '../data-store.js';
+import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises, isDashboardOnboardingSeen, setDashboardOnboardingSeen, incrementDashboardVisits, isPwaInstallDismissed, dismissPwaInstall } from '../data-store.js';
 import { calcBMI, getBMICategory, calcMealCalories, calcWater, MACRO_SPLITS } from '../calculator.js';
 
 // SVG Icons matching Pencil design
@@ -46,6 +46,11 @@ export function renderDashboard(container) {
     const profile = getProfile();
     const results = getResults();
     if (!profile || !results) { navigate('landing'); return; }
+
+    const visits = incrementDashboardVisits();
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+    const showInstallBanner = visits >= 3 && !isPwaInstallDismissed() && !isStandalone;
 
     const totals = getDailyTotals();
     const meals = getTodayMeals();
@@ -170,15 +175,30 @@ export function renderDashboard(container) {
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 </div>
                 <div style="flex:1;">
-                    <span style="font-size:14px; font-weight:600; color:var(--text-dark);">Upoznaj OZZY</span>
+                    <span style="font-size:14px; font-weight:600; color:var(--text-dark);">Više o OZZY Dnevny Dozzy</span>
                     <p style="font-size:11px; color:var(--text-light); margin-top:2px;">Saznaj više o proizvodu</p>
                 </div>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </div>
 
+            <!-- Install App Banner -->
+            ${showInstallBanner ? `
+            <div id="pwaInstallBanner" style="margin:0 20px 16px; padding:14px 16px; border:2px solid var(--primary); border-radius:var(--r-xl); background:var(--primary-light); position:relative;">
+                <button id="pwaInstallDismiss" style="position:absolute; top:8px; right:10px; background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:18px; line-height:1;">✕</button>
+                <div id="pwaInstallAction" style="display:flex; align-items:center; gap:12px; cursor:pointer;">
+                    <div style="width:40px; height:40px; border-radius:50%; background:white; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m5 12 7 7 7-7"/><path d="M4 20h16"/></svg>
+                    </div>
+                    <div style="flex:1; padding-right:16px;">
+                        <span style="font-size:14px; font-weight:600; color:var(--text-dark);">Dodaj aplikaciju na početni ekran</span>
+                        <p style="font-size:11px; color:var(--text-light); margin-top:2px;">Koristi kao pravu aplikaciju</p>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
+
             <!-- Footer -->
             <div class="dash-footer">
-                Powered by Ozzy NutriFon<br>
                 <span style="color:var(--primary);">#dnevnydozzy</span>
             </div>
         `;
@@ -202,6 +222,58 @@ export function renderDashboard(container) {
         screen.querySelector('#ozzyProductBtn')?.addEventListener('click', () => {
             // TODO: Zameniti sa eksternim URL-om ili internim ekranom
             alert('Uskoro: više o OZZY proizvodu!');
+        });
+
+        // PWA Install banner
+        screen.querySelector('#pwaInstallDismiss')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dismissPwaInstall();
+            screen.querySelector('#pwaInstallBanner')?.remove();
+        });
+        screen.querySelector('#pwaInstallAction')?.addEventListener('click', () => {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            if (window.__pwaInstallPrompt) {
+                // Android / Chrome — trigger native install
+                window.__pwaInstallPrompt.prompt();
+                window.__pwaInstallPrompt.userChoice.then(result => {
+                    if (result.outcome === 'accepted') {
+                        dismissPwaInstall();
+                        screen.querySelector('#pwaInstallBanner')?.remove();
+                    }
+                    window.__pwaInstallPrompt = null;
+                });
+            } else if (isIOS) {
+                // iOS — show instructions popup
+                const overlay = document.createElement('div');
+                overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; display:flex; align-items:flex-end; justify-content:center;';
+                overlay.innerHTML = `
+                    <div style="background:white; border-radius:20px 20px 0 0; padding:28px 24px 36px; width:100%; max-width:375px;">
+                        <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin-bottom:20px; text-align:center;">Dodaj na početni ekran</h3>
+                        <div style="display:flex; flex-direction:column; gap:16px;">
+                            <div style="display:flex; align-items:center; gap:14px;">
+                                <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <span style="font-size:14px; font-weight:700; color:var(--primary);">1</span>
+                                </div>
+                                <span style="font-size:14px; color:var(--text-dark);">Tapni <strong>Share</strong> dugme <span style="font-size:18px;">□↑</span> na dnu ekrana</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:14px;">
+                                <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <span style="font-size:14px; font-weight:700; color:var(--primary);">2</span>
+                                </div>
+                                <span style="font-size:14px; color:var(--text-dark);">Izaberi <strong>Add to Home Screen</strong></span>
+                            </div>
+                        </div>
+                        <button id="pwaIosClose" style="margin-top:24px; width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:var(--r-xl); font-size:15px; font-weight:600; cursor:pointer;">Razumem</button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                overlay.querySelector('#pwaIosClose').addEventListener('click', () => {
+                    overlay.remove();
+                    dismissPwaInstall();
+                    screen.querySelector('#pwaInstallBanner')?.remove();
+                });
+                overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+            }
         });
 
         // Water drop click handlers

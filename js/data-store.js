@@ -96,6 +96,18 @@ export function setQuizState(key, value) {
     sessionStorage.setItem('ozzy_quiz_state', JSON.stringify(state));
 }
 
+// PWA install banner
+export function getDashboardVisits() {
+    return parseInt(localStorage.getItem('ozzy_dashboard_visits') || '0');
+}
+export function incrementDashboardVisits() {
+    const v = getDashboardVisits() + 1;
+    localStorage.setItem('ozzy_dashboard_visits', v.toString());
+    return v;
+}
+export function isPwaInstallDismissed() { return !!localStorage.getItem('ozzy_pwa_install_dismissed'); }
+export function dismissPwaInstall() { localStorage.setItem('ozzy_pwa_install_dismissed', 'true'); }
+
 // Reset
 export function clearAll() {
     localStorage.clear();
