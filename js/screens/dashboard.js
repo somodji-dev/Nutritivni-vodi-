@@ -372,7 +372,7 @@ function renderMacroCard(label, consumed, target, color) {
     return `
         <div class="macro-card">
             <span class="macro-label">${label}</span>
-            <span class="macro-value">${consumed} / ${target}g</span>
+            <span class="macro-value">${Math.round(consumed)} / ${target}g</span>
             <div class="macro-bar"><div class="macro-bar-fill" style="width:${pct}%; background:${color};"></div></div>
         </div>
     `;
