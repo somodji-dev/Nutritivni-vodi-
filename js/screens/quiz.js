@@ -261,7 +261,7 @@ function renderStep1(container) {
 
     [
         { name: 'Smršaj', icon: ICONS.fire },
-        { name: 'Nabildaj se', icon: ICONS.dumbbell },
+        { name: 'Nabaci mišiće', icon: ICONS.dumbbell },
         { name: 'Ostani fit', icon: ICONS.trophy }
     ].forEach(g => {
         const card = document.createElement('div');
@@ -470,7 +470,7 @@ function renderStep6b(container) {
 // ===== Step 7 - Kojim tempom do ciljne težine? =====
 function renderStep7(container) {
     const quiz = getQuizState();
-    const isGain = quiz.goal === 'Nabildaj se';
+    const isGain = quiz.goal === 'Nabaci mišiće';
     const sign = isGain ? '+' : '−';
 
     const screen = makeScreen();
@@ -493,7 +493,7 @@ function renderStep7(container) {
         }
     });
 
-    // Stope prilagođene cilju: deficit za Smršaj, suficit za Nabildaj se
+    // Stope prilagođene cilju: deficit za Smršaj, suficit za Nabaci mišiće
     const tempos = isGain ? [
         { name: 'Turbo', desc: 'Intenzivno', rate: `${sign}0.45 kg/ned`, icon: ICONS.zap, color: '#FF9500' },
         { name: 'Stabilno', desc: 'Umereno', rate: `${sign}0.32 kg/ned`, icon: ICONS.lightbulb, color: '#00A8D8' },

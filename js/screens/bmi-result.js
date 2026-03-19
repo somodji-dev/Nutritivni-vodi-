@@ -1,7 +1,7 @@
 // ========== BMI Result Screen (Pencil: 5AFEB) ==========
 import { navigate } from '../router.js';
 import { calcBMI, getBMICategory } from '../calculator.js';
-import { getQuizState, saveProfile } from '../data-store.js';
+import { getQuizState, saveProfile, setQuizState } from '../data-store.js';
 
 export function renderBMIResult(container) {
     const quiz = getQuizState();

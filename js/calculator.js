@@ -60,7 +60,7 @@ export function calcTDEE(bmr) {
 // Calorie goal
 export function calcCalorieGoal(tdee, goal, tempo) {
     if (goal === 'Smršaj') return tdee - (DEFICIT_MAP[tempo] || 500);
-    if (goal === 'Nabildaj se') return tdee + (SURPLUS_MAP[tempo] || 350);
+    if (goal === 'Nabaci mišiće' || goal === 'Nabildaj se') return tdee + (SURPLUS_MAP[tempo] || 350);
     return tdee; // Ostani fit
 }
 

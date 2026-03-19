@@ -242,32 +242,52 @@ export function renderDashboard(container) {
                     }
                     window.__pwaInstallPrompt = null;
                 });
-            } else if (isIOS) {
-                // iOS — show instructions popup
+            } else {
+                // iOS ili Android bez beforeinstallprompt — prikaži uputstvo
                 const overlay = document.createElement('div');
                 overlay.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; display:flex; align-items:flex-end; justify-content:center;';
+                const steps = isIOS ? `
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span style="font-size:14px; font-weight:700; color:var(--primary);">1</span>
+                        </div>
+                        <span style="font-size:14px; color:var(--text-dark);">Otvori ovu stranicu u <strong>Safari</strong> pregledaču</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span style="font-size:14px; font-weight:700; color:var(--primary);">2</span>
+                        </div>
+                        <span style="font-size:14px; color:var(--text-dark);">Tapni <strong>Share</strong> dugme <span style="font-size:18px;">□↑</span> na dnu ekrana</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span style="font-size:14px; font-weight:700; color:var(--primary);">3</span>
+                        </div>
+                        <span style="font-size:14px; color:var(--text-dark);">Izaberi <strong>Add to Home Screen</strong></span>
+                    </div>
+                ` : `
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span style="font-size:14px; font-weight:700; color:var(--primary);">1</span>
+                        </div>
+                        <span style="font-size:14px; color:var(--text-dark);">Tapni <strong>⋮</strong> (tri tačke) gore desno</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <span style="font-size:14px; font-weight:700; color:var(--primary);">2</span>
+                        </div>
+                        <span style="font-size:14px; color:var(--text-dark);">Izaberi <strong>Dodaj na početni ekran</strong></span>
+                    </div>
+                `;
                 overlay.innerHTML = `
                     <div style="background:white; border-radius:20px 20px 0 0; padding:28px 24px 36px; width:100%; max-width:375px;">
                         <h3 style="font-size:16px; font-weight:700; color:var(--text-dark); margin-bottom:20px; text-align:center;">Dodaj na početni ekran</h3>
-                        <div style="display:flex; flex-direction:column; gap:16px;">
-                            <div style="display:flex; align-items:center; gap:14px;">
-                                <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                    <span style="font-size:14px; font-weight:700; color:var(--primary);">1</span>
-                                </div>
-                                <span style="font-size:14px; color:var(--text-dark);">Tapni <strong>Share</strong> dugme <span style="font-size:18px;">□↑</span> na dnu ekrana</span>
-                            </div>
-                            <div style="display:flex; align-items:center; gap:14px;">
-                                <div style="width:36px; height:36px; border-radius:10px; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                                    <span style="font-size:14px; font-weight:700; color:var(--primary);">2</span>
-                                </div>
-                                <span style="font-size:14px; color:var(--text-dark);">Izaberi <strong>Add to Home Screen</strong></span>
-                            </div>
-                        </div>
-                        <button id="pwaIosClose" style="margin-top:24px; width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:var(--r-xl); font-size:15px; font-weight:600; cursor:pointer;">Razumem</button>
+                        <div style="display:flex; flex-direction:column; gap:16px;">${steps}</div>
+                        <button id="pwaClose" style="margin-top:24px; width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:var(--r-xl); font-size:15px; font-weight:600; cursor:pointer;">Razumem</button>
                     </div>
                 `;
                 document.body.appendChild(overlay);
-                overlay.querySelector('#pwaIosClose').addEventListener('click', () => {
+                overlay.querySelector('#pwaClose').addEventListener('click', () => {
                     overlay.remove();
                     dismissPwaInstall();
                     screen.querySelector('#pwaInstallBanner')?.remove();
@@ -434,7 +454,7 @@ function showCaloriesPopup(screen, profile, results, exerciseCals = 0) {
                 <p class="step-calc">TDEE = kalorijski cilj</p>
                 <p class="step-result" style="color:var(--green);">= ${results.calories} kcal dnevno</p>
             </div>
-            ` : profile.goal === 'Nabildaj se' ? `
+            ` : profile.goal === 'Nabaci mišiće' ? `
             <div class="formula-step">
                 <div style="display:flex; align-items:center;">
                     <span class="step-num" style="background:var(--green);">3</span>

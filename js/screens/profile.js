@@ -23,7 +23,7 @@ function ozzyConfirm({ icon = '⚠️', title, desc, confirmText = 'Potvrdi', ca
     document.body.appendChild(overlay);
 }
 
-const GOAL_OPTIONS = ['Smršaj', 'Nabildaj se', 'Ostani fit'];
+const GOAL_OPTIONS = ['Smršaj', 'Nabaci mišiće', 'Ostani fit'];
 const GENDER_OPTIONS = ['Muško', 'Žensko'];
 const DIET_OPTIONS = ['Jedem sve', 'Low Carb', 'Biljni fokus', 'Paleo / Clean'];
 const TEMPO_OPTIONS = ['Turbo', 'Stabilno', 'Opušteno'];
