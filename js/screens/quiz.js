@@ -443,20 +443,65 @@ function renderStep6(container) {
         }
     });
 
-    [
-        { name: 'Sedeći', desc: 'Kancelarijski posao, malo kretanja' },
-        { name: 'Lagano aktivan/na', desc: 'Lagana šetnja, lake aktivnosti' },
-        { name: 'Umereno aktivan/na', desc: 'Redovno vežbanje 3-5x nedeljno' },
-        { name: 'Veoma aktivan/na', desc: 'Intenzivni treninzi 6-7x nedeljno' }
-    ].forEach(a => {
-        const card = document.createElement('div');
-        card.className = 'option-card';
-        card.innerHTML = `
-            <div>
-                <span class="option-name">${a.name}</span>
-                <p style="font-size:12px; color:var(--text-light); margin-top:2px;">${a.desc}</p>
+    const ACTIVITY_LEVELS = [
+        {
+            name: 'Mirovanje', desc: 'Kancelarija, auto, učenje', factor: '×1.2',
+            icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>',
+            detail: 'Većinu dana provodite sedeći ili stojeći (kancelarija, auto, učenje).\n\nVaš bazalni metabolizam (BMR) množimo sa 1.2 da bismo dobili energiju za preživljavanje i minimalno kretanje.\n\nSve dodatne vežbe unosite ručno kao bonus kalorije.'
+        },
+        {
+            name: 'Lagano kretanje', desc: 'Stajanje, šetnja, do 8.000 koraka', factor: '×1.375',
+            icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4" r="2"/><path d="M13.5 8.5 15 12l-3 3 1.5 5.5"/><path d="M10.5 8.5 9 12l3 3-1.5 5.5"/></svg>',
+            detail: 'Posao koji zahteva stajanje ili šetnju (prodavac, frizer, učitelj).\n\nNa vaš BMR dodajemo 37.5% energije za svakodnevne obaveze i kretanje do 8.000 koraka.\n\nTreninge i sport i dalje unosite ručno samo onim danima kada ih odradite.'
+        },
+        {
+            name: 'Visoka aktivnost', desc: 'Stalno kretanje, dinamičan posao', factor: '×1.55',
+            icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="17" cy="4" r="2"/><path d="M15.59 13.51l-1.16-2.65a2.38 2.38 0 0 0-1.6-1.38l-2.21-.55a1.69 1.69 0 0 0-1.87.74L7 12.5"/><path d="m14 16.5-2.5-3.5L8 17l-3-1"/><path d="m17 14 2.78 5.14A1.3 1.3 0 0 1 18.64 21H17"/><path d="M8 17l-1.59 4.45A1.23 1.23 0 0 0 7.57 23h1.17"/></svg>',
+            detail: 'Dinamičan posao sa stalnim kretanjem (konobar, medicinska sestra, dostavljač).\n\nNa vaš BMR dodajemo 55% energije zbog visokog tempa vašeg radnog dana.\n\nVaša baza je već visoka. Treninge unosite samo ako su bili vanredno intenzivni.'
+        },
+        {
+            name: 'Težak fizički rad', desc: 'Nošenje tereta, građevina, magacin', factor: '×1.725',
+            icon: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>',
+            detail: 'Intenzivan napor i nošenje tereta (građevina, magacin, poljoprivreda).\n\nVaš BMR množimo sa 1.725 jer vaše telo troši ogromnu energiju na sam radni proces.\n\nPažnja – kalorijski cilj je blizu maksimuma. Dodatne vežbe unosite samo u izuzetnim slučajevima.'
+        }
+    ];
+
+    function showActivityDetail(a) {
+        const overlay = document.createElement('div');
+        overlay.className = 'overlay';
+        overlay.innerHTML = `
+            <div style="background:white; border-radius:24px; padding:28px 24px; max-width:320px; width:90%; display:flex; flex-direction:column; align-items:center; gap:20px; box-shadow:0 -4px 24px rgba(0,0,0,0.08);">
+                <div style="width:56px; height:56px; border-radius:28px; background:var(--primary-light); display:flex; align-items:center; justify-content:center;">
+                    ${a.icon.replace(/width="22" height="22"/g, 'width="28" height="28"')}
+                </div>
+                <span style="font-size:18px; font-weight:700; color:var(--text-dark); font-family:Poppins; text-align:center;">${a.name} <span style="color:var(--primary);">${a.factor}</span></span>
+                <p style="font-size:14px; color:#666; font-family:Poppins; text-align:center; line-height:1.6; white-space:pre-line;">${a.detail}</p>
+                <button class="activity-detail-close" style="width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:14px; font-size:16px; font-weight:600; font-family:Poppins; cursor:pointer;">Razumem</button>
             </div>
         `;
+        document.body.appendChild(overlay);
+        overlay.querySelector('.activity-detail-close').addEventListener('click', () => overlay.remove());
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+    }
+
+    ACTIVITY_LEVELS.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'option-card';
+        card.style.cssText = 'display:flex; align-items:center; gap:12px; padding:16px 14px;';
+        card.innerHTML = `
+            <span style="display:flex; flex-shrink:0;">${a.icon}</span>
+            <div style="flex:1; min-width:0;">
+                <span class="option-name">${a.name}</span>
+                <p style="font-size:11px; color:var(--text-light); margin-top:2px;">${a.desc}</p>
+            </div>
+            <button class="activity-info-btn" style="flex-shrink:0; width:32px; height:32px; border-radius:16px; background:var(--primary-light); border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </button>
+        `;
+        card.querySelector('.activity-info-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            showActivityDetail(a);
+        });
         card.addEventListener('click', () => {
             selectedActivity = a.name;
             selectCard(card, options);

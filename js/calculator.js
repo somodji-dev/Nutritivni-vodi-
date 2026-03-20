@@ -2,6 +2,11 @@
 
 // Faktori aktivnosti prema nivou
 export const ACTIVITY_FACTORS = {
+    'Mirovanje': 1.2,
+    'Lagano kretanje': 1.375,
+    'Visoka aktivnost': 1.55,
+    'Težak fizički rad': 1.725,
+    // Backward compat za stare profile
     'Sedeći': 1.2,
     'Lagano aktivan/na': 1.375,
     'Umereno aktivan/na': 1.55,
