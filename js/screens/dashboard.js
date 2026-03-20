@@ -1,7 +1,7 @@
 // ========== Dashboard Screen (Pencil: 9oPY4) ==========
 import { navigate } from '../router.js';
 import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises, isDashboardOnboardingSeen, setDashboardOnboardingSeen, incrementDashboardVisits, isPwaInstallDismissed, dismissPwaInstall } from '../data-store.js';
-import { calcBMI, getBMICategory, calcMealCalories, calcWater, MACRO_SPLITS } from '../calculator.js';
+import { calcBMI, getBMICategory, calcMealCalories, calcWater, MACRO_SPLITS, ACTIVITY_FACTORS } from '../calculator.js';
 
 // SVG Icons matching Pencil design
 const SVG = {
@@ -438,10 +438,9 @@ function showCaloriesPopup(screen, profile, results, exerciseCals = 0) {
                     <span class="step-num" style="background:var(--blue);">2</span>
                     <span class="step-title">Bazalna dnevna potrošnja (TDEE)</span>
                 </div>
-                <p class="step-formula">BMR × bazalni faktor (1.2)</p>
-                <p class="step-calc">${results.bmr} × 1.2</p>
+                <p class="step-formula">BMR × faktor aktivnosti (${profile.activityLevel || 'Sedeći'})</p>
+                <p class="step-calc">${results.bmr} × ${ACTIVITY_FACTORS[profile.activityLevel] || 1.2}</p>
                 <p class="step-result" style="color:var(--blue);">= ${results.tdee} kcal</p>
-                <p style="font-size:11px; color:var(--text-muted); margin-top:4px;">Vežbe se dodaju posebno kroz unos aktivnosti.</p>
             </div>
 
             ${profile.goal === 'Ostani fit' ? `
