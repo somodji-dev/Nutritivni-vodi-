@@ -93,15 +93,7 @@ export function renderBMIResult(container) {
 
     screen.querySelector('#bmiBack').addEventListener('click', () => navigate('quiz', { step: '5' }));
     screen.querySelector('#bmiVozzy').addEventListener('click', () => {
-        const goal = quiz.goal;
-        if (goal === 'Ostani fit') {
-            // Preskoči ciljnu težinu i tempo — postavi defaults i idi na tip ishrane
-            setQuizState('targetWeight', weight);
-            setQuizState('tempo', 'Stabilno');
-            navigate('quiz', { step: '6b' });
-        } else {
-            navigate('quiz', { step: '6' });
-        }
+        navigate('quiz', { step: '6' });
     });
 
     container.appendChild(screen);

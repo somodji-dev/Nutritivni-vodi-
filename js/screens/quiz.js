@@ -242,7 +242,7 @@ function selectCard(card, container) {
 // ===== Step 1 - Koji je tvoj cilj? =====
 function renderStep1(container) {
     const screen = makeScreen();
-    screen.appendChild(header(1, 7, () => navigate('landing')));
+    screen.appendChild(header(1, 8,() => navigate('landing')));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Koji je tvoj', 'cilj?', 'Hajde da saznamo šta ti treba!'));
     screen.appendChild(spacer());
@@ -284,7 +284,7 @@ function renderStep1(container) {
 // ===== Step 2 - Koji si pol? =====
 function renderStep2(container) {
     const screen = makeScreen();
-    screen.appendChild(header(2, 7, () => navigate('quiz', { step: '1' })));
+    screen.appendChild(header(2, 8,() => navigate('quiz', { step: '1' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Koji si', 'pol?', 'Za precizniji proračun tvog plana!'));
     screen.appendChild(spacer());
@@ -332,7 +332,7 @@ function renderStep2(container) {
 // ===== Step 3 - Koliko imaš godina? =====
 function renderStep3(container) {
     const screen = makeScreen();
-    screen.appendChild(header(3, 7, () => navigate('quiz', { step: '2' }), 'skip', () => {
+    screen.appendChild(header(3, 8,() => navigate('quiz', { step: '2' }), 'skip', () => {
         navigate('quiz', { step: '4' });
     }));
     screen.appendChild(document.createElement('div')).style.height = '12px';
@@ -355,7 +355,7 @@ function renderStep3(container) {
 // ===== Step 4 - Kolika je tvoja visina? =====
 function renderStep4(container) {
     const screen = makeScreen();
-    screen.appendChild(header(4, 7, () => navigate('quiz', { step: '3' })));
+    screen.appendChild(header(4, 8,() => navigate('quiz', { step: '3' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Kolika je tvoja', 'visina?', 'Hajde da vidimo koliko si visok/a!'));
     screen.appendChild(spacer());
@@ -375,7 +375,7 @@ function renderStep4(container) {
 // ===== Step 5 - Tvoja težina danas? =====
 function renderStep5(container) {
     const screen = makeScreen();
-    screen.appendChild(header(5, 7, () => navigate('quiz', { step: '4' })));
+    screen.appendChild(header(5, 8,() => navigate('quiz', { step: '4' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Tvoja težina', 'danas?', 'Koliko kilograma imaš danas?'));
     screen.appendChild(spacer());
@@ -392,10 +392,66 @@ function renderStep5(container) {
     container.appendChild(screen);
 }
 
-// ===== Step 6 - Tvoja ciljna težina? =====
+// ===== Step 6 - Koliko si fizički aktivan/na? =====
 function renderStep6(container) {
     const screen = makeScreen();
-    screen.appendChild(header(6, 7, () => navigate('bmi')));
+    screen.appendChild(header(6, 8, () => navigate('bmi')));
+    screen.appendChild(document.createElement('div')).style.height = '12px';
+    screen.appendChild(title('Koliko si fizički', 'aktivan/na?', 'Ovo nam pomaže da preciznije izračunamo tvoj plan.'));
+    screen.appendChild(spacer());
+
+    let selectedActivity = null;
+    const quiz = getQuizState();
+    const isOstaniFit = quiz.goal === 'Ostani fit';
+
+    const options = document.createElement('div');
+    options.style.cssText = 'display:flex; flex-direction:column; gap:12px; padding:0 24px;';
+
+    const vozzy = mascotCTA(() => {
+        if (selectedActivity) {
+            setQuizState('activityLevel', selectedActivity);
+            if (isOstaniFit) {
+                setQuizState('targetWeight', quiz.weight || 72);
+                setQuizState('tempo', 'Stabilno');
+                navigate('quiz', { step: '7b' });
+            } else {
+                navigate('quiz', { step: '7' });
+            }
+        }
+    });
+
+    [
+        { name: 'Sedeći', desc: 'Kancelarijski posao, malo kretanja' },
+        { name: 'Lagano aktivan/na', desc: 'Lagana šetnja, lake aktivnosti' },
+        { name: 'Umereno aktivan/na', desc: 'Redovno vežbanje 3-5x nedeljno' },
+        { name: 'Veoma aktivan/na', desc: 'Intenzivni treninzi 6-7x nedeljno' }
+    ].forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'option-card';
+        card.innerHTML = `
+            <div>
+                <span class="option-name">${a.name}</span>
+                <p style="font-size:12px; color:var(--text-light); margin-top:2px;">${a.desc}</p>
+            </div>
+        `;
+        card.addEventListener('click', () => {
+            selectedActivity = a.name;
+            selectCard(card, options);
+            activateVozzy(screen);
+        });
+        options.appendChild(card);
+    });
+
+    screen.appendChild(options);
+    screen.appendChild(spacer());
+    screen.appendChild(vozzy);
+    container.appendChild(screen);
+}
+
+// ===== Step 7 - Tvoja ciljna težina? =====
+function renderStep7(container) {
+    const screen = makeScreen();
+    screen.appendChild(header(7, 8, () => navigate('quiz', { step: '6' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Tvoja ciljna', 'težina?', 'Gde želiš da stigneš? Mi ćemo ti pomoći!'));
     screen.appendChild(spacer());
@@ -407,18 +463,18 @@ function renderStep6(container) {
     screen.appendChild(spacer());
     screen.appendChild(mascotCTA(() => {
         setQuizState('targetWeight', selected);
-        navigate('quiz', { step: '6b' });
+        navigate('quiz', { step: '7b' });
     }, true));
     container.appendChild(screen);
 }
 
-// ===== Step 6b - Šta danas ide u tvoj tanjir? =====
-function renderStep6b(container) {
+// ===== Step 7b - Šta danas ide u tvoj tanjir? =====
+function renderStep7b(container) {
     const quiz = getQuizState();
     const isOstaniFit = quiz.goal === 'Ostani fit';
     const screen = makeScreen();
-    // Back: za "Ostani fit" vrati na BMI (preskočili smo step 6), inače na step 6
-    screen.appendChild(header(isOstaniFit ? 6 : 6, 7, () => navigate(isOstaniFit ? 'bmi' : 'quiz', isOstaniFit ? {} : { step: '6' })));
+    // Back: za "Ostani fit" vrati na step 6 (aktivnost), inače na step 7 (ciljna težina)
+    screen.appendChild(header(isOstaniFit ? 7 : 7, 8, () => navigate('quiz', { step: isOstaniFit ? '6' : '7' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Šta danas ide u tvoj', 'tanjir?', 'Izaberi stil ishrane koji ti odgovara!'));
     screen.appendChild(spacer());
@@ -432,14 +488,13 @@ function renderStep6b(container) {
         if (selectedDiet) {
             setQuizState('dietType', selectedDiet);
             if (isOstaniFit) {
-                // Preskoči tempo — direktno sačuvaj i idi na loading
                 const profile = getQuizState();
                 profile.dietType = selectedDiet;
                 profile.tempo = 'Stabilno';
                 saveProfile(profile);
                 navigate('loading');
             } else {
-                navigate('quiz', { step: '7' });
+                navigate('quiz', { step: '8' });
             }
         }
     });
@@ -467,14 +522,14 @@ function renderStep6b(container) {
     container.appendChild(screen);
 }
 
-// ===== Step 7 - Kojim tempom do ciljne težine? =====
-function renderStep7(container) {
+// ===== Step 8 - Kojim tempom do ciljne težine? =====
+function renderStep8(container) {
     const quiz = getQuizState();
     const isGain = quiz.goal === 'Nabaci mišiće';
     const sign = isGain ? '+' : '−';
 
     const screen = makeScreen();
-    screen.appendChild(header(7, 7, () => navigate('quiz', { step: '6b' })));
+    screen.appendChild(header(8, 8, () => navigate('quiz', { step: '7b' })));
     screen.appendChild(document.createElement('div')).style.height = '12px';
     screen.appendChild(title('Kojim tempom do', 'ciljne težine?', 'Odaberi koliko brzo želiš da stigneš do svoje ciljne težine.'));
     screen.appendChild(spacer());
@@ -493,7 +548,6 @@ function renderStep7(container) {
         }
     });
 
-    // Stope prilagođene cilju: deficit za Smršaj, suficit za Nabaci mišiće
     const tempos = isGain ? [
         { name: 'Turbo', desc: 'Intenzivno', rate: `${sign}0.45 kg/ned`, icon: ICONS.zap, color: '#FF9500' },
         { name: 'Stabilno', desc: 'Umereno', rate: `${sign}0.32 kg/ned`, icon: ICONS.lightbulb, color: '#00A8D8' },
@@ -533,7 +587,7 @@ function renderStep7(container) {
 }
 
 // ===== Router =====
-const steps = { '1': renderStep1, '2': renderStep2, '3': renderStep3, '4': renderStep4, '5': renderStep5, '6': renderStep6, '6b': renderStep6b, '7': renderStep7 };
+const steps = { '1': renderStep1, '2': renderStep2, '3': renderStep3, '4': renderStep4, '5': renderStep5, '6': renderStep6, '7': renderStep7, '7b': renderStep7b, '8': renderStep8 };
 
 export function renderQuiz(container, params = {}) {
     const step = params.step || '1';

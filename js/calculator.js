@@ -1,7 +1,12 @@
 // ========== Nutrition Calculator ==========
 
-// Bazalni faktor aktivnosti (sedeći) — vežbe se dodaju eksplicitno kroz unos
-export const BASELINE_ACTIVITY_FACTOR = 1.2;
+// Faktori aktivnosti prema nivou
+export const ACTIVITY_FACTORS = {
+    'Sedeći': 1.2,
+    'Lagano aktivan/na': 1.375,
+    'Umereno aktivan/na': 1.55,
+    'Veoma aktivan/na': 1.725
+};
 
 // Deficit za mršavljenje (kcal/dan)
 export const DEFICIT_MAP = {
@@ -52,9 +57,10 @@ export function calcBMR(gender, weightKg, heightCm, age) {
     return 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
 }
 
-// TDEE — bazalni (sedeći × 1.2), vežbe se dodaju eksplicitno na dashboardu
-export function calcTDEE(bmr) {
-    return bmr * BASELINE_ACTIVITY_FACTOR;
+// TDEE — BMR × faktor aktivnosti
+export function calcTDEE(bmr, activityLevel) {
+    const factor = ACTIVITY_FACTORS[activityLevel] || 1.2;
+    return bmr * factor;
 }
 
 // Calorie goal
@@ -113,7 +119,7 @@ export function calcAllResults(profile) {
     const age = Math.max(profile.age || 25, 10);
 
     const bmr = calcBMR(profile.gender, weight, height, age);
-    const tdee = calcTDEE(bmr);
+    const tdee = calcTDEE(bmr, profile.activityLevel);
     let calories = calcCalorieGoal(tdee, profile.goal, profile.tempo);
 
     // Safety limits: never below 1200, never more than 1000 above TDEE
