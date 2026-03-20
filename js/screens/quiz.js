@@ -393,6 +393,29 @@ function renderStep5(container) {
 }
 
 // ===== Step 6 - Koliko si fizički aktivan/na? =====
+function showActivityInfoPopup(screen) {
+    if (localStorage.getItem('ozzy_activity_info_seen')) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.style.cssText = 'display:flex; align-items:center; justify-content:center;';
+    overlay.innerHTML = `
+        <div style="background:white; border-radius:24px; padding:28px 24px; max-width:320px; width:90%; display:flex; flex-direction:column; align-items:center; gap:20px; box-shadow:0 -4px 24px rgba(0,0,0,0.08);">
+            <div style="width:56px; height:56px; border-radius:28px; background:var(--primary-light); display:flex; align-items:center; justify-content:center;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </div>
+            <span style="font-size:18px; font-weight:700; color:var(--text-dark); font-family:Poppins; text-align:center;">Važno za preciznost!</span>
+            <p style="font-size:14px; color:#666; font-family:Poppins; text-align:center; line-height:1.5;">Izaberi nivo koji najbolje opisuje tvoj tipičan radni dan BEZ treninga. Vežbe ćeš unositi posebno, čime ćemo sprečiti da ti aplikacija računa kalorije za treninge koje si možda preskočio.</p>
+            <button id="activityInfoClose" style="width:100%; padding:14px; background:var(--primary); color:white; border:none; border-radius:14px; font-size:16px; font-weight:600; font-family:Poppins; cursor:pointer;">Razumem</button>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#activityInfoClose').addEventListener('click', () => {
+        localStorage.setItem('ozzy_activity_info_seen', '1');
+        overlay.remove();
+    });
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) { localStorage.setItem('ozzy_activity_info_seen', '1'); overlay.remove(); } });
+}
+
 function renderStep6(container) {
     const screen = makeScreen();
     screen.appendChild(header(6, 8, () => navigate('bmi')));
@@ -446,6 +469,9 @@ function renderStep6(container) {
     screen.appendChild(spacer());
     screen.appendChild(vozzy);
     container.appendChild(screen);
+
+    // Prikaži info popup pri prvom otvaranju
+    showActivityInfoPopup(screen);
 }
 
 // ===== Step 7 - Tvoja ciljna težina? =====
