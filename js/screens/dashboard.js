@@ -208,7 +208,7 @@ export function renderDashboard(container) {
             navigate('profile');
         });
 
-        screen.querySelector('#calCard').addEventListener('click', () => showCaloriesPopup(screen, profile, results, exerciseCals));
+        screen.querySelector('#calCard').addEventListener('click', () => showCaloriesPopup(screen, profile, results, exerciseCals, totals.kcal));
         screen.querySelector('#exerciseCard').addEventListener('click', () => navigate('exercise'));
         screen.querySelector('#macroRow').addEventListener('click', () => showMacrosPopup(screen, profile, results));
 
@@ -413,7 +413,7 @@ function renderMealCardV2(type, name, icon, targetCal, items) {
     `;
 }
 
-function showCaloriesPopup(screen, profile, results, exerciseCals = 0) {
+function showCaloriesPopup(screen, profile, results, exerciseCals = 0, foodKcal = 0) {
     const overlay = document.createElement('div');
     overlay.className = 'overlay';
     overlay.innerHTML = `
@@ -484,6 +484,27 @@ function showCaloriesPopup(screen, profile, results, exerciseCals = 0) {
                 <p class="step-formula">Kalorijski cilj + potrošene kalorije od vežbe</p>
                 <p class="step-calc">${results.calories} + ${exerciseCals} (vežba)</p>
                 <p class="step-result" style="color:var(--primary);">= ${results.calories + exerciseCals} kcal prilagođeni cilj</p>
+            </div>
+            ` : ''}
+
+            ${foodKcal > 0 ? `
+            <div class="formula-step">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:#FF9500;">${exerciseCals > 0 ? '5' : '4'}</span>
+                    <span class="step-title">Uneta hrana danas</span>
+                </div>
+                <p class="step-formula">Kalorije koje si uneo/la kroz obroke</p>
+                <p class="step-result" style="color:#FF9500;">= ${foodKcal} kcal</p>
+            </div>
+
+            <div class="formula-step" style="background:var(--bg-light); border:2px solid var(--primary-light);">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:var(--green);">${exerciseCals > 0 ? '6' : '5'}</span>
+                    <span class="step-title">Preostalo za danas</span>
+                </div>
+                <p class="step-formula">Prilagođeni cilj − uneta hrana</p>
+                <p class="step-calc">${results.calories + exerciseCals} − ${foodKcal}</p>
+                <p class="step-result" style="color:var(--green); font-size:18px;">= ${Math.max(0, results.calories + exerciseCals - foodKcal)} kcal</p>
             </div>
             ` : ''}
         </div>
