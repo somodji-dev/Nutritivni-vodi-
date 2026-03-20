@@ -83,11 +83,8 @@ export function renderBMIResult(container) {
         <p style="font-size:14px; color:var(--text-light); text-align:center; margin-bottom:16px;">Super si! Hajde da napravimo plan.</p>
 
         <div class="mascot active" id="bmiVozzy">
-            <img src="assets/Device bez pozadine.png" alt="vozzy">
-            <div class="mascot-text">
-                <span class="mascot-name">vozzy</span>
-                <span class="mascot-action">dalje</span>
-            </div>
+            <span class="mascot-label">vozzy<br>dalje</span>
+            <span class="material-symbols-rounded mascot-arrow">keyboard_double_arrow_right</span>
         </div>
     `;
 

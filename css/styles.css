@@ -316,55 +316,45 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 4px;
     padding: 16px 0;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    transition: opacity 0.3s ease;
-    opacity: 0.45;
+    visibility: hidden;
+    opacity: 0;
     pointer-events: none;
 }
 
 .mascot.active {
+    visibility: visible;
     opacity: 1;
     pointer-events: auto;
-}
-
-.mascot.active img {
-    animation: vozzyPulse 1.8s ease-in-out infinite;
 }
 
 .mascot:active {
     transform: scale(0.95);
 }
 
-.mascot img {
-    height: 48px;
-    width: auto;
-    transition: transform 0.15s ease;
-}
-
-.mascot-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-}
-
-.mascot-name {
-    font-size: 20px;
+.mascot-label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 35px;
     font-weight: 700;
+    color: var(--primary);
+    line-height: 0.9;
+}
+
+.mascot-arrow {
+    font-size: 40px;
     color: var(--primary);
 }
 
-.mascot-action {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--primary);
+.mascot.active .mascot-arrow {
+    animation: arrowPulse 1.8s ease-in-out infinite;
 }
 
-@keyframes vozzyPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.08); }
+@keyframes arrowPulse {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(5px); }
 }
 
 /* ========== BMI Result ========== */
@@ -465,9 +455,9 @@ body {
 
 /* Calorie card v2 (light bg, fire icon, progress bar) */
 .cal-card-v2 {
-    margin: 16px 20px;
+    margin: 8px 20px;
     padding: 20px;
-    background: var(--blue-light);
+    background: transparent;
     border-radius: var(--r-xl);
     cursor: pointer;
 }

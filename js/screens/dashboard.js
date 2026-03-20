@@ -1,6 +1,6 @@
 // ========== Dashboard Screen (Pencil: 9oPY4) ==========
 import { navigate } from '../router.js';
-import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises, isDashboardOnboardingSeen, setDashboardOnboardingSeen, incrementDashboardVisits, isPwaInstallDismissed, dismissPwaInstall } from '../data-store.js';
+import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises, isDashboardOnboardingSeen, setDashboardOnboardingSeen, incrementDashboardVisits, isPwaInstallDismissed, dismissPwaInstall, getMealsForDate, getTotalsForDate, getExercisesForDate, getExerciseCaloriesForDate, getWaterForDate } from '../data-store.js';
 import { calcBMI, getBMICategory, calcMealCalories, calcWater, MACRO_SPLITS, ACTIVITY_FACTORS } from '../calculator.js';
 
 // SVG Icons matching Pencil design
@@ -52,25 +52,48 @@ export function renderDashboard(container) {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     const showInstallBanner = visits >= 3 && !isPwaInstallDismissed() && !isStandalone;
 
-    const totals = getDailyTotals();
-    const meals = getTodayMeals();
+    const todayStr = new Date().toISOString().slice(0, 10);
+    let selectedDate = todayStr;
+
     const mealCals = results.mealCals;
-    let water = getTodayWater();
     const waterTarget = results.water;
     const bmi = results.bmi;
     const bmiCat = getBMICategory(bmi);
-    const exerciseCals = getDailyExerciseCalories();
-    const exercises = getTodayExercises();
-
-    const adjustedGoal = results.calories + exerciseCals;
-    const remaining = Math.max(0, adjustedGoal - totals.kcal);
-    const calPercent = Math.min(100, (totals.kcal / adjustedGoal) * 100);
 
     const screen = document.createElement('div');
     screen.className = 'screen';
 
+    function formatDateLabel(dateStr) {
+        const MONTHS = ['januar','februar','mart','april','maj','jun','jul','avgust','septembar','oktobar','novembar','decembar'];
+        const d = new Date(dateStr + 'T12:00:00');
+        const day = d.getDate();
+        const month = MONTHS[d.getMonth()];
+        if (dateStr === todayStr) return `Danas, ${day}. ${month}`;
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        if (dateStr === yesterday.toISOString().slice(0, 10)) return `Juče, ${day}. ${month}`;
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        if (dateStr === tomorrow.toISOString().slice(0, 10)) return `Sutra, ${day}. ${month}`;
+        return `${day}. ${month}`;
+    }
+
+    function shiftDate(offset) {
+        const d = new Date(selectedDate + 'T12:00:00');
+        d.setDate(d.getDate() + offset);
+        selectedDate = d.toISOString().slice(0, 10);
+        renderScreen();
+    }
+
     function renderScreen() {
-        water = getTodayWater();
+        const totals = getTotalsForDate(selectedDate);
+        const meals = getMealsForDate(selectedDate);
+        let water = getWaterForDate(selectedDate);
+        const exerciseCals = getExerciseCaloriesForDate(selectedDate);
+        const exercises = getExercisesForDate(selectedDate);
+        const adjustedGoal = results.calories + exerciseCals;
+        const remaining = Math.max(0, adjustedGoal - totals.kcal);
+        const calPercent = Math.min(100, (totals.kcal / adjustedGoal) * 100);
 
         screen.innerHTML = `
             <!-- Header -->
@@ -87,20 +110,46 @@ export function renderDashboard(container) {
                 </div>
             </div>
 
-            <!-- Calorie Card (light bg, fire icon, progress bar) -->
-            <div class="cal-card-v2" id="calCard">
-                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                    <div>
-                        <p style="font-size:12px; font-weight:500; color:var(--text-light);">Dnevne kalorije</p>
-                        <p style="font-family:var(--font-numbers); font-size:38px; font-weight:900; color:var(--text-dark); line-height:1.1; margin-top:4px;">${remaining.toLocaleString()}</p>
-                        <p style="font-size:12px; color:var(--text-light); margin-top:2px;">/ ${adjustedGoal.toLocaleString()} kcal preostalo${exerciseCals > 0 ? ' <span style="color:var(--green);">(+' + exerciseCals + ' vežba)</span>' : ''}</p>
+            <!-- Day Picker -->
+            <div style="display:flex; align-items:center; justify-content:center; gap:16px; padding:0 24px; margin:10px 0 0;">
+                <button id="dayPrev" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <span style="font-size:15px; font-weight:600; color:var(--text-dark); font-family:Poppins,sans-serif; min-width:160px; text-align:center;">${formatDateLabel(selectedDate)}</span>
+                <button id="dayNext" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
+            </div>
+
+            <!-- Calorie Card (3-column with semicircle) -->
+            <div class="cal-card-v2" id="calCard" style="margin-top:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <!-- Levo: Uneto -->
+                    <div style="text-align:left; flex:1; padding-left:4px;">
+                        <p style="font-size:11px; font-weight:500; color:var(--text-light);">Uneto</p>
+                        <p style="font-family:var(--font-numbers); font-size:24px; font-weight:400; color:var(--text-dark); line-height:1.1; margin-top:2px;">${totals.kcal.toLocaleString()}</p>
+                        <p style="font-size:11px; color:var(--text-light);">kcal</p>
                     </div>
-                    <div style="width:40px; height:40px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center;">
-                        ${SVG.fire}
+                    <!-- Centar: Polukružni progress -->
+                    <div style="flex:1.5; display:flex; flex-direction:column; align-items:center;">
+                        <div style="position:relative; width:160px; height:115px;">
+                            <svg viewBox="0 0 160 90" width="160" height="90" style="overflow:visible;">
+                                <path d="M 12 78 A 68 68 0 0 1 148 78" fill="none" stroke="var(--bg-divider)" stroke-width="10" stroke-linecap="round"/>
+                                <path d="M 12 78 A 68 68 0 0 1 148 78" fill="none" stroke="var(--primary)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${Math.PI * 68}" stroke-dashoffset="${Math.PI * 68 * (1 - calPercent / 100)}"/>
+                            </svg>
+                            <div style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); text-align:center; white-space:nowrap;">
+                                <p style="font-family:var(--font-numbers); font-size:32px; font-weight:900; color:var(--text-dark); line-height:1;">${remaining.toLocaleString()}</p>
+                                <p style="font-size:12px; color:var(--text-light); margin-top:2px;">kcal preostalo</p>
+                                <p style="font-size:12px; color:var(--text-light); margin-top:1px;">od ${adjustedGoal.toLocaleString()} kcal</p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div style="margin-top:12px; height:6px; background:var(--bg-divider); border-radius:3px; overflow:hidden;">
-                    <div style="height:100%; width:${calPercent}%; background:linear-gradient(90deg, var(--blue), var(--green)); border-radius:3px; transition:width 0.5s ease;"></div>
+                    <!-- Desno: Potrošeno -->
+                    <div style="text-align:right; flex:1; padding-right:4px;">
+                        <p style="font-size:11px; font-weight:500; color:var(--text-light);">Potrošeno</p>
+                        <p style="font-family:var(--font-numbers); font-size:24px; font-weight:400; color:var(--text-dark); line-height:1.1; margin-top:2px;">${exerciseCals.toLocaleString()}</p>
+                        <p style="font-size:11px; color:var(--text-light);">kcal</p>
+                    </div>
                 </div>
             </div>
 
@@ -204,6 +253,9 @@ export function renderDashboard(container) {
         `;
 
         // Event listeners
+        screen.querySelector('#dayPrev').addEventListener('click', () => shiftDate(-1));
+        screen.querySelector('#dayNext').addEventListener('click', () => shiftDate(1));
+
         screen.querySelector('#profileBtn').addEventListener('click', () => {
             navigate('profile');
         });
@@ -303,9 +355,9 @@ export function renderDashboard(container) {
                 const idx = parseInt(btn.dataset.idx);
                 // If clicking on an already-filled drop at the current water level, decrease
                 if (idx + 1 === water) {
-                    setTodayWater(idx);
+                    setTodayWater(idx, selectedDate);
                 } else {
-                    setTodayWater(idx + 1);
+                    setTodayWater(idx + 1, selectedDate);
                 }
                 renderScreen();
             });

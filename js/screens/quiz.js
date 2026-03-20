@@ -49,13 +49,15 @@ function header(step, total, onBack, rightType = 'user', onRight = null) {
     return div;
 }
 
-function title(main, highlight, sub) {
+function title(main, highlight, sub, compact = false) {
     const div = document.createElement('div');
     div.style.cssText = 'text-align:center; padding:0 24px;';
+    const gap1 = compact ? '0px' : '4px';
+    const gap2 = compact ? '4px' : '10px';
     div.innerHTML = `
         <h2 style="font-size:28px; font-weight:700; color:var(--text-dark);">${main}</h2>
-        <h2 style="font-size:28px; font-weight:700; color:var(--primary); margin-top:4px;">${highlight}</h2>
-        <p style="font-size:14px; color:var(--text-light); margin-top:10px;">${sub}</p>
+        <h2 style="font-size:28px; font-weight:700; color:var(--primary); margin-top:${gap1};">${highlight}</h2>
+        <p style="font-size:14px; color:var(--text-light); margin-top:${gap2};">${sub}</p>
     `;
     return div;
 }
@@ -71,11 +73,8 @@ function mascotCTA(onClick, startActive = false) {
     const div = document.createElement('div');
     div.className = 'mascot' + (startActive ? ' active' : '');
     div.innerHTML = `
-        <img src="assets/Device bez pozadine.png" alt="vozzy">
-        <div class="mascot-text">
-            <span class="mascot-name">vozzy</span>
-            <span class="mascot-action">dalje</span>
-        </div>
+        <span class="mascot-label">vozzy<br>dalje</span>
+        <span class="material-symbols-rounded mascot-arrow">keyboard_double_arrow_right</span>
     `;
     div.addEventListener('click', () => {
         if (div.classList.contains('active')) {
@@ -419,16 +418,14 @@ function showActivityInfoPopup(screen) {
 function renderStep6(container) {
     const screen = makeScreen();
     screen.appendChild(header(6, 8, () => navigate('bmi')));
-    screen.appendChild(document.createElement('div')).style.height = '12px';
-    screen.appendChild(title('Koliko si fizički', 'aktivan/na?', 'Ovo nam pomaže da preciznije izračunamo tvoj plan.'));
-    screen.appendChild(spacer());
+    screen.appendChild(title('Koliko si fizički', 'aktivan/na?', 'Ovo nam pomaže da preciznije izračunamo tvoj plan.', true));
 
     let selectedActivity = null;
     const quiz = getQuizState();
     const isOstaniFit = quiz.goal === 'Ostani fit';
 
     const options = document.createElement('div');
-    options.style.cssText = 'display:flex; flex-direction:column; gap:12px; padding:0 24px;';
+    options.style.cssText = 'display:flex; flex-direction:column; gap:8px; padding:0 24px;';
 
     const vozzy = mascotCTA(() => {
         if (selectedActivity) {
@@ -487,7 +484,7 @@ function renderStep6(container) {
     ACTIVITY_LEVELS.forEach(a => {
         const card = document.createElement('div');
         card.className = 'option-card';
-        card.style.cssText = 'display:flex; align-items:center; gap:12px; padding:16px 14px;';
+        card.style.cssText = 'display:flex; align-items:center; gap:10px; padding:10px 14px;';
         card.innerHTML = `
             <span style="display:flex; flex-shrink:0;">${a.icon}</span>
             <div style="flex:1; min-width:0;">
@@ -546,14 +543,12 @@ function renderStep7b(container) {
     const screen = makeScreen();
     // Back: za "Ostani fit" vrati na step 6 (aktivnost), inače na step 7 (ciljna težina)
     screen.appendChild(header(isOstaniFit ? 7 : 7, 8, () => navigate('quiz', { step: isOstaniFit ? '6' : '7' })));
-    screen.appendChild(document.createElement('div')).style.height = '12px';
-    screen.appendChild(title('Šta danas ide u tvoj', 'tanjir?', 'Izaberi stil ishrane koji ti odgovara!'));
-    screen.appendChild(spacer());
+    screen.appendChild(title('Šta danas ide u tvoj', 'tanjir?', 'Izaberi stil ishrane koji ti odgovara!', true));
 
     let selectedDiet = null;
 
     const options = document.createElement('div');
-    options.style.cssText = 'display:flex; flex-direction:column; gap:12px; padding:0 24px;';
+    options.style.cssText = 'display:flex; flex-direction:column; gap:8px; padding:0 24px;';
 
     const vozzy = mascotCTA(() => {
         if (selectedDiet) {
@@ -578,6 +573,7 @@ function renderStep7b(container) {
     ].forEach(d => {
         const card = document.createElement('div');
         card.className = 'option-card';
+        card.style.padding = '14px 20px';
         card.innerHTML = `<span class="option-name">${d.name}</span>${d.icon}`;
         card.addEventListener('click', () => {
             selectedDiet = d.name;

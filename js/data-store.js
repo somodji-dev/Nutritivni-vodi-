@@ -28,18 +28,22 @@ function mealKey(date) {
     return `ozzy_meals_${d}`;
 }
 
-export function getTodayMeals() {
-    return safeParse(localStorage.getItem(mealKey())) || { dorucak: null, rucak: null, vecera: null, uzina: null };
+export function getTodayMeals() { return getMealsForDate(); }
+
+export function getMealsForDate(date) {
+    return safeParse(localStorage.getItem(mealKey(date))) || { dorucak: null, rucak: null, vecera: null, uzina: null };
 }
 
-export function saveMeal(type, items) {
-    const meals = getTodayMeals();
+export function saveMeal(type, items, date) {
+    const meals = getMealsForDate(date);
     meals[type] = items;
-    localStorage.setItem(mealKey(), JSON.stringify(meals));
+    localStorage.setItem(mealKey(date), JSON.stringify(meals));
 }
 
-export function getDailyTotals() {
-    const meals = getTodayMeals();
+export function getDailyTotals() { return getTotalsForDate(); }
+
+export function getTotalsForDate(date) {
+    const meals = getMealsForDate(date);
     const totals = { kcal: 0, protein: 0, carbs: 0, fat: 0 };
     Object.values(meals).forEach(items => {
         if (items) items.forEach(item => {
@@ -58,24 +62,36 @@ function exerciseKey(date) {
     return `ozzy_exercises_${d}`;
 }
 
-export function getTodayExercises() {
-    return safeParse(localStorage.getItem(exerciseKey())) || [];
+export function getTodayExercises() { return getExercisesForDate(); }
+
+export function getExercisesForDate(date) {
+    return safeParse(localStorage.getItem(exerciseKey(date))) || [];
 }
 
-export function saveExercise(items) {
-    localStorage.setItem(exerciseKey(), JSON.stringify(items));
+export function saveExercise(items, date) {
+    localStorage.setItem(exerciseKey(date), JSON.stringify(items));
 }
 
-export function getDailyExerciseCalories() {
-    return getTodayExercises().reduce((sum, item) => sum + (item.kcalBurned || 0), 0);
+export function getDailyExerciseCalories() { return getExerciseCaloriesForDate(); }
+
+export function getExerciseCaloriesForDate(date) {
+    return getExercisesForDate(date).reduce((sum, item) => sum + (item.kcalBurned || item.kcal || 0), 0);
 }
 
 // Water
-export function getTodayWater() {
-    return parseInt(localStorage.getItem(`ozzy_water_${new Date().toISOString().slice(0, 10)}`) || '0');
+function waterKey(date) {
+    const d = date || new Date().toISOString().slice(0, 10);
+    return `ozzy_water_${d}`;
 }
-export function setTodayWater(glasses) {
-    localStorage.setItem(`ozzy_water_${new Date().toISOString().slice(0, 10)}`, glasses.toString());
+
+export function getTodayWater() { return getWaterForDate(); }
+
+export function getWaterForDate(date) {
+    return parseInt(localStorage.getItem(waterKey(date)) || '0');
+}
+
+export function setTodayWater(glasses, date) {
+    localStorage.setItem(waterKey(date), glasses.toString());
 }
 
 // AI Disclaimer
