@@ -192,9 +192,13 @@ export function renderProfile(container) {
         // Buttons
         const btns = screen.querySelector('.profile-buttons');
         btns.innerHTML = `
-            <button class="profile-btn save">
+            <button class="profile-btn save" style="flex:0 0 100%;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                 Sačuvaj
+            </button>
+            <button class="profile-btn share" style="background:var(--primary); color:white;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.42" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Podeli
             </button>
             <button class="profile-btn retry">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1F3A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -245,6 +249,26 @@ export function renderProfile(container) {
                     navigate('landing');
                 }
             });
+        });
+
+        screen.querySelector('.profile-btn.share').addEventListener('click', async () => {
+            const shareData = {
+                title: 'OZZY Nutritivni Vodič',
+                text: 'Prati kalorije, obroke i vežbe uz AI analizu! Probaj OZZY:',
+                url: window.location.origin
+            };
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    await navigator.clipboard.writeText(shareData.url);
+                    const toast = document.createElement('div');
+                    toast.textContent = 'Link kopiran!';
+                    toast.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--text-dark); color:white; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:999; animation:fadeIn 0.2s ease;';
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 2000);
+                }
+            } catch(e) { /* user cancelled share */ }
         });
     }
 

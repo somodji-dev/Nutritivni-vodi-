@@ -27,7 +27,8 @@ const SVG = {
     cookie: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></svg>',
     check: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
     chevronRight: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
-    plus: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'
+    plus: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
+    share: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.42" y1="6.51" x2="8.59" y2="10.49"/></svg>'
 };
 
 function getExerciseIcon(name) {
@@ -103,10 +104,16 @@ export function renderDashboard(container) {
                         <h1 class="dash-greeting">${profile.name ? `Zdravo, ${profile.name}!` : 'Zdravo!'}</h1>
                         <p class="dash-sub">Evo tvog nutritivnog vodica</p>
                     </div>
-                    <button id="profileBtn" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; flex-direction:column; align-items:center; gap:2px;">
-                        ${SVG.user}
-                        <span style="font-size:10px; color:var(--text-light);">Moj profil</span>
-                    </button>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button id="shareBtn" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; flex-direction:column; align-items:center; gap:2px;">
+                            ${SVG.share}
+                            <span style="font-size:10px; color:var(--text-light);">Podeli</span>
+                        </button>
+                        <button id="profileBtn" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; flex-direction:column; align-items:center; gap:2px;">
+                            ${SVG.user}
+                            <span style="font-size:10px; color:var(--text-light);">Moj profil</span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -146,7 +153,7 @@ export function renderDashboard(container) {
                     </div>
                     <!-- Desno: Potrošeno -->
                     <div style="text-align:right; flex:1; padding-right:4px;">
-                        <p style="font-size:11px; font-weight:500; color:var(--text-light);">Potrošeno</p>
+                        <p style="font-size:11px; font-weight:500; color:var(--text-light);">Vežba</p>
                         <p style="font-family:var(--font-numbers); font-size:24px; font-weight:400; color:var(--text-dark); line-height:1.1; margin-top:2px;">${exerciseCals.toLocaleString()}</p>
                         <p style="font-size:11px; color:var(--text-light);">kcal</p>
                     </div>
@@ -258,6 +265,26 @@ export function renderDashboard(container) {
 
         screen.querySelector('#profileBtn').addEventListener('click', () => {
             navigate('profile');
+        });
+
+        screen.querySelector('#shareBtn').addEventListener('click', async () => {
+            const shareData = {
+                title: 'OZZY Nutritivni Vodič',
+                text: 'Prati kalorije, obroke i vežbe uz AI analizu! Probaj OZZY:',
+                url: window.location.origin
+            };
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    await navigator.clipboard.writeText(shareData.url);
+                    const toast = document.createElement('div');
+                    toast.textContent = 'Link kopiran!';
+                    toast.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--text-dark); color:white; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:999; animation:fadeIn 0.2s ease;';
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 2000);
+                }
+            } catch(e) { /* user cancelled share */ }
         });
 
         screen.querySelector('#calCard').addEventListener('click', () => showCaloriesPopup(screen, profile, results, exerciseCals, totals.kcal));

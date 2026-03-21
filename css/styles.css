@@ -854,7 +854,7 @@ body {
 .profile-row-right { display:flex; align-items:center; gap:6px; }
 .profile-row-value { font-size:14px; font-weight:600; color:var(--text-dark); }
 .profile-buttons {
-    display:flex; gap:6px; padding:12px 20px 0;
+    display:flex; flex-wrap:wrap; gap:6px; padding:12px 20px 0;
 }
 .profile-btn {
     flex:1; display:flex; align-items:center; justify-content:center; gap:6px;
