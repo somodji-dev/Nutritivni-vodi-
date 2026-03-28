@@ -13,7 +13,8 @@ async function boot() {
         { renderDashboard },
         { renderMealInput },
         { renderProfile },
-        { renderExerciseInput }
+        { renderExerciseInput },
+        { renderProgress }
     ] = await Promise.all([
         import('./router.js?v=' + V),
         import('./data-store.js?v=' + V),
@@ -24,7 +25,8 @@ async function boot() {
         import('./screens/dashboard.js?v=' + V),
         import('./screens/meal-input.js?v=' + V),
         import('./screens/profile.js?v=' + V),
-        import('./screens/exercise-input.js?v=' + V)
+        import('./screens/exercise-input.js?v=' + V),
+        import('./screens/progress.js?v=' + V)
     ]);
 
     const app = document.getElementById('app');
@@ -38,7 +40,8 @@ async function boot() {
         'dashboard': renderDashboard,
         'meal': renderMealInput,
         'profile': renderProfile,
-        'exercise': renderExerciseInput
+        'exercise': renderExerciseInput,
+        'progress': renderProgress
     };
 
     function parseHash() {

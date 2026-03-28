@@ -1,6 +1,6 @@
 // ========== Dashboard Screen (Pencil: 9oPY4) ==========
 import { navigate } from '../router.js';
-import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises, isDashboardOnboardingSeen, setDashboardOnboardingSeen, incrementDashboardVisits, isPwaInstallDismissed, dismissPwaInstall, getMealsForDate, getTotalsForDate, getExercisesForDate, getExerciseCaloriesForDate, getWaterForDate } from '../data-store.js';
+import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises, isDashboardOnboardingSeen, setDashboardOnboardingSeen, incrementDashboardVisits, isPwaInstallDismissed, dismissPwaInstall, getMealsForDate, getTotalsForDate, getExercisesForDate, getExerciseCaloriesForDate, getWaterForDate, getWeightForDate, saveWeightForDate, saveProfile } from '../data-store.js';
 import { calcBMI, getBMICategory, calcMealCalories, calcWater, MACRO_SPLITS, ACTIVITY_FACTORS, calcExerciseMacroAdjustment, EXERCISE_MACRO_SPLITS, EXERCISE_CATEGORY_LABELS } from '../calculator.js';
 
 // SVG Icons matching Pencil design
@@ -213,6 +213,16 @@ export function renderDashboard(container) {
                 ${renderMealCardV2('uzina', 'Užina', SVG.cookie, mealCals.uzina, meals.uzina)}
             </div>
 
+            <!-- Današnja težina -->
+            <div class="weight-card" id="weightCard" style="cursor:pointer;">
+                <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                    <span style="font-size:18px;">⚖️</span>
+                    <span style="font-size:13px; font-weight:600; color:var(--text-dark);">Današnja težina</span>
+                </div>
+                <span style="font-family:var(--font-numbers); font-size:18px; font-weight:900; color:var(--primary);" id="weightDisplay">${getWeightForDate(selectedDate) || profile.weight || '—'} kg</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </div>
+
             <!-- Water Tracker (8 clickable drops) -->
             <div class="water-tracker">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
@@ -229,6 +239,18 @@ export function renderDashboard(container) {
                         </button>
                     `).join('')}
                 </div>
+            </div>
+
+            <!-- Progres Card (link to progress page) -->
+            <div id="progressCard" style="margin:0 20px 16px; padding:14px 20px; border:2px solid var(--primary-light); border-radius:var(--r-xl); cursor:pointer; display:flex; align-items:center; gap:12px; background:white;">
+                <div style="width:40px; height:40px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                </div>
+                <div style="flex:1;">
+                    <span style="font-size:14px; font-weight:600; color:var(--text-dark);">Progres</span>
+                    <p style="font-size:11px; color:var(--text-light); margin-top:2px;">Prati kalorije, makrose i težinu</p>
+                </div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
             </div>
 
             <!-- OZZY Proizvod -->
@@ -302,6 +324,14 @@ export function renderDashboard(container) {
             card.addEventListener('click', () => {
                 navigate('meal', { type: card.dataset.type });
             });
+        });
+
+        // Progress card
+        screen.querySelector('#progressCard')?.addEventListener('click', () => navigate('progress'));
+
+        // Weight card
+        screen.querySelector('#weightCard')?.addEventListener('click', () => {
+            showWeightInputPopup(screen, profile, selectedDate, () => renderScreen());
         });
 
         // OZZY product button
@@ -828,3 +858,49 @@ function showMacrosPopup(screen, profile, results, exercises = [], exerciseCals 
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
     screen.appendChild(overlay);
 }
+
+// ========== Weight Input Popup ==========
+function showWeightInputPopup(screen, profile, date, onSave) {
+    const currentWeight = getWeightForDate(date) || profile.weight || 70;
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.innerHTML = `
+        <div class="bottom-sheet" style="padding:28px 24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="font-size:17px; font-weight:700;">Unesi današnju težinu</h3>
+                <button id="closeWeightPopup" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-light);">✕</button>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:center; gap:16px; margin:20px 0;">
+                <button id="weightMinus" style="width:48px; height:48px; border-radius:50%; border:2px solid var(--border-light); background:white; font-size:24px; font-weight:700; cursor:pointer; color:var(--text-dark);">−</button>
+                <div style="text-align:center;">
+                    <input id="weightInput" type="number" value="${currentWeight}" step="0.1" min="30" max="250" style="font-family:var(--font-numbers); font-size:36px; font-weight:900; color:var(--primary); width:100px; text-align:center; border:none; background:none; outline:none;">
+                    <p style="font-size:13px; color:var(--text-light);">kg</p>
+                </div>
+                <button id="weightPlus" style="width:48px; height:48px; border-radius:50%; border:2px solid var(--border-light); background:white; font-size:24px; font-weight:700; cursor:pointer; color:var(--text-dark);">+</button>
+            </div>
+            <button id="weightSave" class="btn btn-primary" style="width:100%; margin-top:12px;">Sačuvaj</button>
+        </div>
+    `;
+
+    const input = overlay.querySelector('#weightInput');
+    overlay.querySelector('#weightMinus').addEventListener('click', () => {
+        input.value = (parseFloat(input.value) - 0.1).toFixed(1);
+    });
+    overlay.querySelector('#weightPlus').addEventListener('click', () => {
+        input.value = (parseFloat(input.value) + 0.1).toFixed(1);
+    });
+    overlay.querySelector('#weightSave').addEventListener('click', () => {
+        const w = parseFloat(input.value);
+        if (w >= 30 && w <= 250) {
+            saveWeightForDate(w, date);
+            profile.weight = w;
+            saveProfile(profile);
+            overlay.remove();
+            onSave();
+        }
+    });
+    overlay.querySelector('#closeWeightPopup').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    screen.appendChild(overlay);
+}
+

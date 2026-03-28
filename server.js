@@ -58,6 +58,7 @@ Pravila:
 - Ako korisnik ne navede količinu, pretpostavi jednu standardnu porciju
 - Kalorije i makrosi moraju biti realni za navedenu količinu
 - Prepoznaj srpska jela (ćevapi, pljeskavica, gibanica, prebranac, itd.)
+- OBAVEZNO koristi SRPSKI jezik, NIKADA hrvatski! Primeri: hleb (ne kruh), mleko (ne mlijeko), jaje (ne jaje), pavlaka (ne vrhnje), paradajz (ne rajčica), supa (ne juha), sos (ne umak), testenina (ne tjestenina), paprika (ne paprika), puter (ne maslac), pirinač (ne riža)
 - Vrati SAMO validan JSON niz, bez dodatnog teksta ili markdown-a.`,
                 messages: [{ role: 'user', content: text }]
             })

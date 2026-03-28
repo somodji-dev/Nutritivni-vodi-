@@ -900,3 +900,82 @@ body {
 .text-center { text-align: center; }
 .px-20 { padding-left: 20px; padding-right: 20px; }
 .px-24 { padding-left: 24px; padding-right: 24px; }
+
+/* ========== Progress Chart ========== */
+.progress-section {
+    margin: 0 20px 16px;
+    padding: 16px;
+    background: var(--bg-white);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border-light);
+}
+
+.progress-period {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-light);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.period-btn {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    font-family: var(--font-numbers);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.period-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.progress-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.toggle-chip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 16px;
+    border: 1.5px solid var(--border-light);
+    background: white;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.toggle-chip input {
+    display: none;
+}
+
+.toggle-chip.active {
+    border-color: var(--chip-color);
+    background: color-mix(in srgb, var(--chip-color) 10%, white);
+    color: var(--chip-color);
+}
+
+/* Weight Card */
+.weight-card {
+    margin: 0 20px 16px;
+    padding: 14px 20px;
+    background: var(--bg-white);
+    border-radius: var(--r-xl);
+    border: 1px solid var(--border-light);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}

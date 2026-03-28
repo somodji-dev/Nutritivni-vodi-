@@ -39,15 +39,20 @@ export default async function handler(req) {
                 max_tokens: 1024,
                 system: `Ti si nutritivni asistent. Korisnik unosi hranu na srpskom jeziku.
 Vrati JSON niz sa prepoznatim namirnicama. Svaka namirnica ima:
-- name: string (srpski)
-- quantity: string (količina, npr "2 komada", "200ml")
+- name: string (srpski naziv)
+- quantity: string (količina, npr "2 komada", "200ml", "1 porcija")
 - emoji: string (1 emoji za tu hranu)
-- kcal: number (kalorije)
+- kcal: number (kalorije za tu količinu)
 - protein: number (grami proteina)
 - carbs: number (grami ugljenih hidrata)
 - fat: number (grami masti)
 
-Vrati SAMO validan JSON niz, bez dodatnog teksta.`,
+Pravila:
+- Ako korisnik ne navede količinu, pretpostavi jednu standardnu porciju
+- Kalorije i makrosi moraju biti realni za navedenu količinu
+- Prepoznaj srpska jela (ćevapi, pljeskavica, gibanica, prebranac, itd.)
+- OBAVEZNO koristi SRPSKI jezik, NIKADA hrvatski! Primeri: hleb (ne kruh), mleko (ne mlijeko), jaje (ne jaje), pavlaka (ne vrhnje), paradajz (ne rajčica), supa (ne juha), sos (ne umak), testenina (ne tjestenina), paprika (ne paprika), puter (ne maslac), pirinač (ne riža)
+- Vrati SAMO validan JSON niz, bez dodatnog teksta ili markdown-a.`,
                 messages: [{ role: 'user', content: text }]
             })
         });

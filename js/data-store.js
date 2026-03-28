@@ -94,6 +94,46 @@ export function setTodayWater(glasses, date) {
     localStorage.setItem(waterKey(date), glasses.toString());
 }
 
+// Weight (date-based)
+function weightKey(date) {
+    const d = date || new Date().toISOString().slice(0, 10);
+    return `ozzy_weight_${d}`;
+}
+
+export function getWeightForDate(date) {
+    const val = localStorage.getItem(weightKey(date));
+    return val ? parseFloat(val) : null;
+}
+
+export function saveWeightForDate(weight, date) {
+    localStorage.setItem(weightKey(date), weight.toString());
+}
+
+// Progress data — collects historical data for chart
+export function getProgressData(days = 30) {
+    const data = [];
+    const today = new Date();
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().slice(0, 10);
+        const totals = getTotalsForDate(dateStr);
+        const exerciseCals = getExerciseCaloriesForDate(dateStr);
+        const weight = getWeightForDate(dateStr);
+        data.push({
+            date: dateStr,
+            label: `${d.getDate()}.${d.getMonth() + 1}.`,
+            calories: totals.kcal,
+            exerciseCals,
+            protein: totals.protein,
+            carbs: totals.carbs,
+            fat: totals.fat,
+            weight
+        });
+    }
+    return data;
+}
+
 // AI Disclaimer
 export function isAIDisclaimerAccepted() { return !!localStorage.getItem(KEYS.aiDisclaimer); }
 export function acceptAIDisclaimer() { localStorage.setItem(KEYS.aiDisclaimer, 'true'); }

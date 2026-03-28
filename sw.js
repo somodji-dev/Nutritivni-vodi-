@@ -1,5 +1,5 @@
 // OZZY Service Worker — enables PWA install & offline caching
-const CACHE_NAME = 'ozzy-v3';
+const CACHE_NAME = 'ozzy-v4';
 const STATIC_ASSETS = [
     '/',
     '/index.html',
@@ -16,8 +16,10 @@ const STATIC_ASSETS = [
     '/js/screens/meal-input.js',
     '/js/screens/exercise-input.js',
     '/js/screens/profile.js',
+    '/js/screens/progress.js',
     '/assets/Device bez pozadine.png',
-    '/manifest.json'
+    '/manifest.json',
+    'https://cdn.jsdelivr.net/npm/apexcharts@3/dist/apexcharts.min.js'
 ];
 
 // Install — cache static assets
