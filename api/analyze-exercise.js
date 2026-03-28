@@ -49,6 +49,11 @@ Vrati JSON niz sa prepoznatim aktivnostima. Svaka aktivnost ima:
 - emoji: string (1 emoji za tu aktivnost)
 - kcalBurned: number (procenjene potrošene kalorije prilagođene težini i polu korisnika)
 - calculationNote: string (kratka formula, npr "MET 7.0 × ${userWeight}kg × 0.5h")
+- category: string (jedna od: "strength", "hiit", "cardio", "light")
+  - "strength" = trening snage (tegovi, sklekovi, čučnjevi, bench press, mrtvo dizanje)
+  - "hiit" = visok intenzitet (HIIT, sprinting, tabata, intervalni trening)
+  - "cardio" = izdržljivost (trčanje, bicikl, plivanje, veslanje, hodanje brzo)
+  - "light" = lagana aktivnost (šetnja, joga, istezanje, pilates)
 
 Pravila:
 - Koristi MET vrednosti za kalkulaciju: kcal = MET × težina(kg) × trajanje(h)

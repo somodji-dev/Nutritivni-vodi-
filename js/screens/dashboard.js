@@ -1,7 +1,7 @@
 // ========== Dashboard Screen (Pencil: 9oPY4) ==========
 import { navigate } from '../router.js';
 import { getProfile, getResults, getDailyTotals, getTodayMeals, getTodayWater, setTodayWater, getDailyExerciseCalories, getTodayExercises, isDashboardOnboardingSeen, setDashboardOnboardingSeen, incrementDashboardVisits, isPwaInstallDismissed, dismissPwaInstall, getMealsForDate, getTotalsForDate, getExercisesForDate, getExerciseCaloriesForDate, getWaterForDate } from '../data-store.js';
-import { calcBMI, getBMICategory, calcMealCalories, calcWater, MACRO_SPLITS, ACTIVITY_FACTORS } from '../calculator.js';
+import { calcBMI, getBMICategory, calcMealCalories, calcWater, MACRO_SPLITS, ACTIVITY_FACTORS, calcExerciseMacroAdjustment, EXERCISE_MACRO_SPLITS, EXERCISE_CATEGORY_LABELS } from '../calculator.js';
 
 // SVG Icons matching Pencil design
 const SVG = {
@@ -93,6 +93,12 @@ export function renderDashboard(container) {
         const exerciseCals = getExerciseCaloriesForDate(selectedDate);
         const exercises = getExercisesForDate(selectedDate);
         const adjustedGoal = results.calories + exerciseCals;
+        const exerciseMacroAdj = calcExerciseMacroAdjustment(exercises, profile.dietType);
+        const adjustedMacros = {
+            protein: results.macros.protein + exerciseMacroAdj.protein,
+            carbs: results.macros.carbs + exerciseMacroAdj.carbs,
+            fat: results.macros.fat + exerciseMacroAdj.fat
+        };
         const remaining = Math.max(0, adjustedGoal - totals.kcal);
         const calPercent = Math.min(100, (totals.kcal / adjustedGoal) * 100);
 
@@ -162,13 +168,13 @@ export function renderDashboard(container) {
 
             <!-- Macro Row -->
             <div class="macro-row" id="macroRow">
-                ${renderMacroCard('Proteini', totals.protein, results.macros.protein, 'var(--primary)')}
-                ${renderMacroCard('Ugljeni', totals.carbs, results.macros.carbs, 'var(--blue)')}
-                ${renderMacroCard('Masti', totals.fat, results.macros.fat, 'var(--green)')}
+                ${renderMacroCard('Proteini', totals.protein, adjustedMacros.protein, 'var(--primary)')}
+                ${renderMacroCard('Ugljeni', totals.carbs, adjustedMacros.carbs, 'var(--blue)')}
+                ${renderMacroCard('Masti', totals.fat, adjustedMacros.fat, 'var(--green)')}
             </div>
 
             <!-- BMI Card (warm bg, heart icon) -->
-            <div class="bmi-card-v2" id="bmiCard">
+            <div class="bmi-card-v2" id="bmiCard" style="cursor:pointer;">
                 <div style="flex:1;">
                     <span style="font-size:12px; color:var(--text-light);">Tvoj BMI</span>
                     <div style="display:flex; align-items:baseline; gap:6px; margin-top:2px;">
@@ -289,7 +295,8 @@ export function renderDashboard(container) {
 
         screen.querySelector('#calCard').addEventListener('click', () => showCaloriesPopup(screen, profile, results, exerciseCals, totals.kcal));
         screen.querySelector('#exerciseCard').addEventListener('click', () => navigate('exercise'));
-        screen.querySelector('#macroRow').addEventListener('click', () => showMacrosPopup(screen, profile, results));
+        screen.querySelector('#macroRow').addEventListener('click', () => showMacrosPopup(screen, profile, results, exercises, exerciseCals));
+        screen.querySelector('#bmiCard').addEventListener('click', () => showBMIPopup(screen, profile, results));
 
         screen.querySelectorAll('.meal-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -297,10 +304,9 @@ export function renderDashboard(container) {
             });
         });
 
-        // OZZY product button (placeholder)
+        // OZZY product button
         screen.querySelector('#ozzyProductBtn')?.addEventListener('click', () => {
-            // TODO: Zameniti sa eksternim URL-om ili internim ekranom
-            alert('Uskoro: više o OZZY proizvodu!');
+            window.open('https://www.ozzynuts.com/dnevnydozzy/', '_blank');
         });
 
         // PWA Install banner
@@ -594,8 +600,130 @@ function showCaloriesPopup(screen, profile, results, exerciseCals = 0, foodKcal 
     screen.appendChild(overlay);
 }
 
-function showMacrosPopup(screen, profile, results) {
+function showBMIPopup(screen, profile, results) {
+    const bmi = results.bmi;
+    const bmiVal = Math.round(bmi * 10) / 10;
+    const cat = getBMICategory(bmi);
+    const h = (profile.height || 170) / 100;
+    const w = profile.weight || 70;
+
+    // BMI scale categories for visual display
+    const categories = [
+        { label: 'Pothranjenost', range: '< 18.5', color: '#00A8D8', min: 0, max: 18.5 },
+        { label: 'Normalna', range: '18.5 - 24.9', color: '#4CAF50', min: 18.5, max: 25 },
+        { label: 'Prekomerna', range: '25 - 29.9', color: '#FF9500', min: 25, max: 30 },
+        { label: 'Gojaznost', range: '≥ 30', color: '#F44336', min: 30, max: 45 }
+    ];
+
+    // Calculate indicator position (16-40 range mapped to 0-100%)
+    const indicatorPos = Math.min(100, Math.max(0, ((bmiVal - 16) / (40 - 16)) * 100));
+
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.innerHTML = `
+        <div class="bottom-sheet">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="font-size:17px; font-weight:700;">Kako smo izračunali BMI?</h3>
+                <button id="closePopup" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-light);">✕</button>
+            </div>
+
+            <div class="formula-step">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:var(--primary);">1</span>
+                    <span class="step-title">Tvoji podaci</span>
+                </div>
+                <div style="display:flex; gap:20px; margin-top:10px;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:18px;">📏</span>
+                        <span style="font-size:13px; color:var(--text-light);">Visina</span>
+                        <span style="font-family:var(--font-numbers); font-weight:900;">${profile.height} cm</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:18px;">⚖️</span>
+                        <span style="font-size:13px; color:var(--text-light);">Težina</span>
+                        <span style="font-family:var(--font-numbers); font-weight:900;">${w} kg</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="formula-step">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:var(--blue);">2</span>
+                    <span class="step-title">Formula</span>
+                </div>
+                <p class="step-formula">BMI = težina (kg) ÷ visina (m)²</p>
+                <p class="step-calc">${w} ÷ (${h.toFixed(2)})² = ${w} ÷ ${(h * h).toFixed(4)}</p>
+                <p class="step-result" style="color:${cat.color}; font-size:18px;">= ${bmiVal}</p>
+            </div>
+
+            <div class="formula-step">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:${cat.color};">3</span>
+                    <span class="step-title">Tvoja kategorija</span>
+                </div>
+                <div style="margin-top:12px;">
+                    <!-- BMI Scale Bar -->
+                    <div style="position:relative; height:24px; border-radius:12px; overflow:hidden; display:flex;">
+                        ${categories.map(c => `<div style="flex:1; background:${c.color};"></div>`).join('')}
+                    </div>
+                    <!-- Indicator -->
+                    <div style="position:relative; margin-top:-28px; height:28px;">
+                        <div style="position:absolute; left:${indicatorPos}%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center;">
+                            <span style="font-family:var(--font-numbers); font-size:11px; font-weight:900; color:var(--text-dark); background:white; padding:1px 4px; border-radius:4px; box-shadow:0 1px 3px rgba(0,0,0,0.2);">${bmiVal}</span>
+                            <div style="width:2px; height:8px; background:var(--text-dark);"></div>
+                        </div>
+                    </div>
+
+                    <!-- Category Legend -->
+                    <div style="display:flex; flex-direction:column; gap:6px; margin-top:16px;">
+                        ${categories.map(c => `
+                            <div style="display:flex; align-items:center; gap:8px; ${c.label === cat.label ? 'font-weight:700;' : ''}">
+                                <div style="width:10px; height:10px; border-radius:50%; background:${c.color};"></div>
+                                <span style="font-size:13px; flex:1;">${c.label}</span>
+                                <span style="font-size:12px; color:var(--text-light);">${c.range}</span>
+                                ${c.label === cat.label ? '<span style="font-size:12px;">← ti</span>' : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    overlay.querySelector('#closePopup').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    screen.appendChild(overlay);
+}
+
+function showMacrosPopup(screen, profile, results, exercises = [], exerciseCals = 0) {
     const split = MACRO_SPLITS[profile.dietType] || MACRO_SPLITS['Jedem sve'];
+    const macroAdj = calcExerciseMacroAdjustment(exercises, profile.dietType);
+    const hasExercise = exerciseCals > 0 && exercises.length > 0;
+
+    // Build exercise detail rows
+    let exerciseRows = '';
+    if (hasExercise) {
+        exercises.forEach(ex => {
+            if (!ex.kcalBurned || ex.kcalBurned <= 0) return;
+            const cat = ex.category || 'cardio';
+            const catLabel = EXERCISE_CATEGORY_LABELS[cat] || 'Kardio';
+            const exSplit = EXERCISE_MACRO_SPLITS[cat] || split;
+            const usedSplit = exSplit || split;
+            const pAdd = Math.round(ex.kcalBurned * usedSplit.protein / 4);
+            const cAdd = Math.round(ex.kcalBurned * usedSplit.carbs / 4);
+            const fAdd = Math.round(ex.kcalBurned * usedSplit.fat / 9);
+            exerciseRows += `
+                <div style="display:flex; align-items:center; gap:6px; font-size:12px; padding:6px 0; border-bottom:1px solid var(--border-light);">
+                    <span>${ex.emoji || '🏃'}</span>
+                    <span style="font-weight:600; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${ex.name} <span style="color:var(--text-light); font-weight:400;">(${catLabel})</span></span>
+                    <span style="color:var(--primary); white-space:nowrap;">+${pAdd}g P</span>
+                    <span style="color:var(--blue); white-space:nowrap;">+${cAdd}g UH</span>
+                    <span style="color:var(--green); white-space:nowrap;">+${fAdd}g M</span>
+                </div>
+            `;
+        });
+    }
+
     const overlay = document.createElement('div');
     overlay.className = 'overlay';
     overlay.innerHTML = `
@@ -620,7 +748,7 @@ function showMacrosPopup(screen, profile, results) {
             <div class="formula-step">
                 <div style="display:flex; align-items:center;">
                     <span class="step-num" style="background:var(--blue);">2</span>
-                    <span class="step-title">Raspodela makronutrijenata</span>
+                    <span class="step-title">Bazna raspodela makrosa</span>
                 </div>
                 <p class="step-formula">procenat × kcal ÷ 4 (protein/UH) ili ÷ 9 (masti) = grami</p>
 
@@ -645,6 +773,54 @@ function showMacrosPopup(screen, profile, results) {
                     </div>
                 </div>
             </div>
+
+            ${hasExercise ? `
+            <div class="formula-step">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:var(--primary);">3</span>
+                    <span class="step-title">Prilagođavanje za vežbe</span>
+                </div>
+                <p class="step-formula">Dodatne kalorije od vežbi se raspoređuju po makrosima na osnovu tipa aktivnosti</p>
+
+                <div style="margin-top:8px;">
+                    ${exerciseRows}
+                </div>
+
+                <div style="margin-top:10px; padding:10px 12px; background:var(--primary-light); border-radius:10px; display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:13px; font-weight:700;">Ukupno od vežbi:</span>
+                    <span style="font-size:12px; color:var(--primary); font-weight:700;">+${macroAdj.protein}g P</span>
+                    <span style="font-size:12px; color:var(--blue); font-weight:700;">+${macroAdj.carbs}g UH</span>
+                    <span style="font-size:12px; color:var(--green); font-weight:700;">+${macroAdj.fat}g M</span>
+                </div>
+            </div>
+
+            <div class="formula-step" style="background:var(--bg-light); border:2px solid var(--primary-light);">
+                <div style="display:flex; align-items:center;">
+                    <span class="step-num" style="background:var(--green);">4</span>
+                    <span class="step-title">Finalni makro ciljevi danas</span>
+                </div>
+                <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:10px; height:10px; border-radius:50%; background:var(--primary);"></div>
+                        <span style="font-size:13px; font-weight:600;">Proteini</span>
+                        <span style="font-size:12px; color:var(--text-light); flex:1;">${results.macros.protein} + ${macroAdj.protein}</span>
+                        <span style="font-family:var(--font-numbers); font-weight:900; color:var(--primary); font-size:15px;">= ${results.macros.protein + macroAdj.protein}g</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:10px; height:10px; border-radius:50%; background:var(--blue);"></div>
+                        <span style="font-size:13px; font-weight:600;">Ugljeni</span>
+                        <span style="font-size:12px; color:var(--text-light); flex:1;">${results.macros.carbs} + ${macroAdj.carbs}</span>
+                        <span style="font-family:var(--font-numbers); font-weight:900; color:var(--blue); font-size:15px;">= ${results.macros.carbs + macroAdj.carbs}g</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div style="width:10px; height:10px; border-radius:50%; background:var(--green);"></div>
+                        <span style="font-size:13px; font-weight:600;">Masti</span>
+                        <span style="font-size:12px; color:var(--text-light); flex:1;">${results.macros.fat} + ${macroAdj.fat}</span>
+                        <span style="font-family:var(--font-numbers); font-weight:900; color:var(--green); font-size:15px;">= ${results.macros.fat + macroAdj.fat}g</span>
+                    </div>
+                </div>
+            </div>
+            ` : ''}
         </div>
     `;
 

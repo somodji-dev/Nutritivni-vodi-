@@ -100,6 +100,47 @@ export function calcMealCalories(totalCalories) {
     };
 }
 
+// Exercise macro adjustment splits per category
+// Strength: higher protein for muscle repair
+// HIIT: high carbs for glycogen replenishment
+// Cardio: balanced with slightly more carbs for endurance
+// Light: uses the user's diet type proportions
+export const EXERCISE_MACRO_SPLITS = {
+    'strength': { protein: 0.40, carbs: 0.40, fat: 0.20 },
+    'hiit':     { protein: 0.25, carbs: 0.55, fat: 0.20 },
+    'cardio':   { protein: 0.20, carbs: 0.55, fat: 0.25 },
+    'light':    null // uses dietType split
+};
+
+export const EXERCISE_CATEGORY_LABELS = {
+    'strength': 'Snaga',
+    'hiit': 'HIIT',
+    'cardio': 'Kardio',
+    'light': 'Lagano'
+};
+
+// Calculate macro adjustment from exercises
+// Returns { protein: grams, carbs: grams, fat: grams } to ADD to base macros
+export function calcExerciseMacroAdjustment(exercises, dietType) {
+    const dietSplit = MACRO_SPLITS[dietType] || MACRO_SPLITS['Jedem sve'];
+    let totalProtein = 0, totalCarbs = 0, totalFat = 0;
+
+    for (const ex of exercises) {
+        const kcal = ex.kcalBurned || 0;
+        if (kcal <= 0) continue;
+
+        const cat = ex.category || 'cardio'; // backward compat
+        const split = EXERCISE_MACRO_SPLITS[cat] || dietSplit;
+        const usedSplit = split || dietSplit; // 'light' uses diet split
+
+        totalProtein += Math.round(kcal * usedSplit.protein / 4);
+        totalCarbs += Math.round(kcal * usedSplit.carbs / 4);
+        totalFat += Math.round(kcal * usedSplit.fat / 9);
+    }
+
+    return { protein: totalProtein, carbs: totalCarbs, fat: totalFat };
+}
+
 // Weeks to goal — izračunato iz efektivnog deficita/suficita (1 kg ≈ 7700 kcal)
 export function calcWeeksToGoal(currentWeight, targetWeight, tempo, tdee, calories) {
     const diff = Math.abs(currentWeight - targetWeight);

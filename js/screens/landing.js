@@ -43,8 +43,7 @@ export function renderLanding(container) {
     });
 
     screen.querySelector('#ozzyProductBtn').addEventListener('click', () => {
-        // TODO: Zameniti sa eksternim URL-om ili internim ekranom
-        alert('Uskoro: više o OZZY proizvodu!');
+        window.open('https://www.ozzynuts.com/dnevnydozzy/', '_blank');
     });
 
     container.appendChild(screen);

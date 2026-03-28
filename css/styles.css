@@ -251,6 +251,12 @@ body {
 .gender-card.male { background: var(--bg-light); }
 .gender-card.female { background: var(--bg-light); }
 
+.gender-card.selected.male,
+.gender-card.selected.female {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
 .gender-card svg {
     width: 48px; height: 48px;
     stroke-width: 1.5;
