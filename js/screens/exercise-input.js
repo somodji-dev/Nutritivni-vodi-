@@ -116,7 +116,21 @@ export function renderExerciseInput(container) {
 
         const btn = screen.querySelector('#analyzeBtn');
         btn.disabled = true;
-        btn.innerHTML = '<div class="spinner" style="width:20px; height:20px; border-width:2px;"></div> Analiziram...';
+
+        // Animated thinking messages
+        const thinkingMsgs = [
+            '🔍 Prepoznajem vežbe...',
+            '📊 Tražim MET vrednosti...',
+            '🧮 Računam kalorije...',
+            '⚖️ Prilagođavam za tvoj profil...',
+            '✅ Završavam analizu...'
+        ];
+        let msgIdx = 0;
+        btn.innerHTML = `<div class="spinner" style="width:20px; height:20px; border-width:2px;"></div> ${thinkingMsgs[0]}`;
+        const thinkingInterval = setInterval(() => {
+            msgIdx = Math.min(msgIdx + 1, thinkingMsgs.length - 1);
+            btn.innerHTML = `<div class="spinner" style="width:20px; height:20px; border-width:2px;"></div> ${thinkingMsgs[msgIdx]}`;
+        }, 1500);
 
         try {
             const profile = getProfile();
@@ -136,8 +150,10 @@ export function renderExerciseInput(container) {
                 throw new Error(err.error || 'API error');
             }
             const data = await resp.json();
-            if (Array.isArray(data) && data.length > 0) {
-                exerciseItems.push(...data);
+            // Filter out _summary item (used internally for validation)
+            const filtered = Array.isArray(data) ? data.filter(d => d.name !== '_summary') : [];
+            if (filtered.length > 0) {
+                exerciseItems.push(...filtered);
             } else {
                 showToast('Nisam prepoznao aktivnost. Pokušaj ponovo sa jasnijim opisom.');
             }
@@ -145,6 +161,7 @@ export function renderExerciseInput(container) {
             showToast('Greška pri analizi vežbe. Pokušaj ponovo.');
         }
 
+        clearInterval(thinkingInterval);
         render();
     }
 

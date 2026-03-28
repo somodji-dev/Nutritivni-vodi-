@@ -40,27 +40,46 @@ export default async function handler(req) {
             },
             body: JSON.stringify({
                 model: 'claude-haiku-4-5-20251001',
-                max_tokens: 1024,
-                system: `Ti si fitnes asistent. Korisnik unosi fizičku aktivnost na srpskom jeziku.
-${userInfo}
-Vrati JSON niz sa prepoznatim aktivnostima. Svaka aktivnost ima:
-- name: string (srpski naziv)
-- duration: string (trajanje, npr "30 min", "1 sat")
-- emoji: string (1 emoji za tu aktivnost)
-- kcalBurned: number (procenjene potrošene kalorije prilagođene težini i polu korisnika)
-- calculationNote: string (kratka formula, npr "MET 7.0 × ${userWeight}kg × 0.5h")
-- category: string (jedna od: "strength", "hiit", "cardio", "light")
-  - "strength" = trening snage (tegovi, sklekovi, čučnjevi, bench press, mrtvo dizanje)
-  - "hiit" = visok intenzitet (HIIT, sprinting, tabata, intervalni trening)
-  - "cardio" = izdržljivost (trčanje, bicikl, plivanje, veslanje, hodanje brzo)
-  - "light" = lagana aktivnost (šetnja, joga, istezanje, pilates)
+                max_tokens: 2048,
+                system: `Ti si precizni fitnes kalkulator. ${userInfo}
 
-Pravila:
-- Koristi MET vrednosti za kalkulaciju: kcal = MET × težina(kg) × trajanje(h)
-- Ako korisnik ne navede trajanje, pretpostavi 30 minuta
-- Kalorije moraju biti realne za navedeno trajanje, intenzitet i podatke korisnika
-- Prepoznaj aktivnosti na srpskom (trčanje, šetnja, teretana, plivanje, bicikl, vožnja bicikla, čučnjevi, sklekovi, yoga, fudbal, košarka, itd.)
-- Vrati SAMO validan JSON niz, bez dodatnog teksta ili markdown-a.`,
+REFERENTNE MET VREDNOSTI (OBAVEZNO koristi ove):
+- Trčanje (lagano, 8km/h): 8.0 | Trčanje (brzo, 10km/h): 10.0
+- Brza šetnja: 3.5 | Lagana šetnja: 2.5
+- Bicikl (umeren): 6.8 | Plivanje (umeren): 7.0
+- Čučnjevi/Mrtvo dizanje/Bench press (sa tegovima): 6.0
+- Sklekovi/Zgibovi: 8.0
+- Biceps/Triceps/Izolacione vežbe: 3.5
+- Vojnički potisak/Ramena: 6.0
+- Plank/Core: 3.8
+- HIIT/Intervalni: 9.0
+- Joga: 3.0 | Istezanje: 2.3
+- Fudbal/Košarka: 8.0 | Tenis: 7.0
+
+METOD KALKULACIJE (OBAVEZNO):
+1. Ako korisnik navede UKUPNO trajanje (npr "sat vremena", "45 min") — rasporedi to vreme na sve vežbe tako da ZBIR bude TAČNO toliko. Uračunaj pauze između serija (~30% ukupnog vremena za trening snage, MET 1.5).
+2. Ako korisnik navede trajanje za svaku vežbu — koristi ta trajanja direktno.
+3. Formula: kcal = MET × ${userWeight}kg × trajanje(h)
+4. PROVERA: Ukupne kalorije za sat vremena mešanog treninga (kardio+snaga) treba da budu 400-550 kcal za osobu od ${userWeight}kg. Ako dobiješ značajno više, smanji — proverio si MET ili trajanje.
+
+RAZMISLI PRE ODGOVORA:
+- Koliko je ukupno vreme? Rasporedi ga realno.
+- Da li su MET vrednosti iz tabele iznad?
+- Da li zbir trajanja odgovara navedenom ukupnom vremenu?
+- Da li ukupne kalorije imaju smisla za tu osobu i to trajanje?
+
+Vrati JSON niz. Svaka aktivnost ima:
+- name: string (srpski naziv)
+- duration: string (trajanje, npr "5 min")
+- emoji: string (1 emoji)
+- kcalBurned: number (zaokruženo na ceo broj)
+- calculationNote: string (formula, npr "MET 6.0 × ${userWeight}kg × 0.133h")
+- category: string ("strength" | "hiit" | "cardio" | "light")
+
+Na kraju JSON niza dodaj JEDNU specijalnu stavku sa ukupnim pregledom:
+{ "name": "_summary", "duration": "UKUPNO VREME", "emoji": "📊", "kcalBurned": UKUPNO_KCAL, "calculationNote": "Prosečan MET X.X za ceo trening", "category": "light" }
+
+Vrati SAMO validan JSON niz.`,
                 messages: [{ role: 'user', content: text }]
             })
         });
@@ -74,8 +93,9 @@ Pravila:
         }
 
         const content = data.content?.[0]?.text || '[]';
-        const cleaned = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-        const parsed = JSON.parse(cleaned);
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) throw new Error('No JSON array found in response');
+        const parsed = JSON.parse(jsonMatch[0]);
 
         return new Response(JSON.stringify(parsed), {
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }

@@ -37,22 +37,43 @@ export default async function handler(req) {
             body: JSON.stringify({
                 model: 'claude-haiku-4-5-20251001',
                 max_tokens: 1024,
-                system: `Ti si nutritivni asistent. Korisnik unosi hranu na srpskom jeziku.
-Vrati JSON niz sa prepoznatim namirnicama. Svaka namirnica ima:
+                system: `Ti si precizni nutritivni kalkulator. Korisnik unosi hranu na srpskom jeziku.
+
+METOD KALKULACIJE (OBAVEZNO):
+Za svaku namirnicu MORAŠ da izračunaš ovako:
+1. Odredi nutritivne vrednosti PER 100g za tu namirnicu
+2. Pomnoži sa tačnom količinom koju je korisnik uneo
+3. Formula: vrednost = (vrednost_per_100g × količina_u_gramima) / 100
+
+PRIMER: Ako korisnik kaže "50g feta sira":
+- Feta per 100g: 264 kcal, 14.2g protein, 4.1g UH, 21.3g masti
+- Za 50g: kcal=132, protein=7.1, carbs=2.1, fat=10.7
+NIKADA ne vraćaj vrednosti za 100g kada korisnik traži 50g!
+
+KONVERZIJE KOLIČINA:
+- "1 parče hleba" = ~30g, "1 kriška" = ~25g
+- "1 jaje" = ~60g (veličina L)
+- "1 kašika" = ~15g, "1 kašičica" = ~5g
+- "1 šolja" = ~240ml
+- "1 porcija" mesa/ribe = ~150g
+- "1 porcija testenine/pirinča (kuvano)" = ~200g
+
+Vrati JSON niz. Svaka namirnica ima:
 - name: string (srpski naziv)
-- quantity: string (količina, npr "2 komada", "200ml", "1 porcija")
-- emoji: string (1 emoji za tu hranu)
-- kcal: number (kalorije za tu količinu)
-- protein: number (grami proteina)
-- carbs: number (grami ugljenih hidrata)
-- fat: number (grami masti)
+- quantity: string (TAČNA količina koju je korisnik uneo, npr "50g", "2 komada")
+- emoji: string (1 emoji)
+- kcal: number (PRERAČUNATO za tačnu količinu, zaokruženo na ceo broj)
+- protein: number (grami, zaokruženo na 1 decimalu)
+- carbs: number (grami, zaokruženo na 1 decimalu)
+- fat: number (grami, zaokruženo na 1 decimalu)
 
 Pravila:
-- Ako korisnik ne navede količinu, pretpostavi jednu standardnu porciju
-- Kalorije i makrosi moraju biti realni za navedenu količinu
-- Prepoznaj srpska jela (ćevapi, pljeskavica, gibanica, prebranac, itd.)
-- OBAVEZNO koristi SRPSKI jezik, NIKADA hrvatski! Primeri: hleb (ne kruh), mleko (ne mlijeko), jaje (ne jaje), pavlaka (ne vrhnje), paradajz (ne rajčica), supa (ne juha), sos (ne umak), testenina (ne tjestenina), paprika (ne paprika), puter (ne maslac), pirinač (ne riža)
-- Vrati SAMO validan JSON niz, bez dodatnog teksta ili markdown-a.`,
+- Ako korisnik navede gramažu (npr "100g", "50g", "200g") — MORAŠ preračunati proporciju
+- Ako korisnik NE navede količinu — pretpostavi 1 standardnu porciju i navedi koliko grama je to
+- PROVERA: kcal ≈ protein×4 + carbs×4 + fat×9 (dozvoljeno odstupanje ±10%)
+- Prepoznaj srpska jela (ćevapi, pljeskavica, gibanica, prebranac, burek, sarma, itd.)
+- OBAVEZNO SRPSKI jezik: hleb (ne kruh), mleko (ne mlijeko), pavlaka (ne vrhnje), paradajz (ne rajčica), supa (ne juha), sos (ne umak), testenina (ne tjestenina), puter (ne maslac), pirinač (ne riža)
+- Vrati SAMO validan JSON niz, bez teksta ili markdown-a.`,
                 messages: [{ role: 'user', content: text }]
             })
         });
@@ -66,8 +87,9 @@ Pravila:
         }
 
         const content = data.content?.[0]?.text || '[]';
-        const cleaned = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-        const parsed = JSON.parse(cleaned);
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) throw new Error('No JSON array found in response');
+        const parsed = JSON.parse(jsonMatch[0]);
 
         return new Response(JSON.stringify(parsed), {
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }

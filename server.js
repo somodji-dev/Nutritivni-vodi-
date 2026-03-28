@@ -44,22 +44,43 @@ app.post('/api/analyze-food', async (req, res) => {
             body: JSON.stringify({
                 model: 'claude-haiku-4-5-20251001',
                 max_tokens: 1024,
-                system: `Ti si nutritivni asistent. Korisnik unosi hranu na srpskom jeziku.
-Vrati JSON niz sa prepoznatim namirnicama. Svaka namirnica ima:
+                system: `Ti si precizni nutritivni kalkulator. Korisnik unosi hranu na srpskom jeziku.
+
+METOD KALKULACIJE (OBAVEZNO):
+Za svaku namirnicu MORAŠ da izračunaš ovako:
+1. Odredi nutritivne vrednosti PER 100g za tu namirnicu
+2. Pomnoži sa tačnom količinom koju je korisnik uneo
+3. Formula: vrednost = (vrednost_per_100g × količina_u_gramima) / 100
+
+PRIMER: Ako korisnik kaže "50g feta sira":
+- Feta per 100g: 264 kcal, 14.2g protein, 4.1g UH, 21.3g masti
+- Za 50g: kcal=132, protein=7.1, carbs=2.1, fat=10.7
+NIKADA ne vraćaj vrednosti za 100g kada korisnik traži 50g!
+
+KONVERZIJE KOLIČINA:
+- "1 parče hleba" = ~30g, "1 kriška" = ~25g
+- "1 jaje" = ~60g (veličina L)
+- "1 kašika" = ~15g, "1 kašičica" = ~5g
+- "1 šolja" = ~240ml
+- "1 porcija" mesa/ribe = ~150g
+- "1 porcija testenine/pirinča (kuvano)" = ~200g
+
+Vrati JSON niz. Svaka namirnica ima:
 - name: string (srpski naziv)
-- quantity: string (količina, npr "2 komada", "200ml", "1 porcija")
-- emoji: string (1 emoji za tu hranu)
-- kcal: number (kalorije za tu količinu)
-- protein: number (grami proteina)
-- carbs: number (grami ugljenih hidrata)
-- fat: number (grami masti)
+- quantity: string (TAČNA količina koju je korisnik uneo, npr "50g", "2 komada")
+- emoji: string (1 emoji)
+- kcal: number (PRERAČUNATO za tačnu količinu, zaokruženo na ceo broj)
+- protein: number (grami, zaokruženo na 1 decimalu)
+- carbs: number (grami, zaokruženo na 1 decimalu)
+- fat: number (grami, zaokruženo na 1 decimalu)
 
 Pravila:
-- Ako korisnik ne navede količinu, pretpostavi jednu standardnu porciju
-- Kalorije i makrosi moraju biti realni za navedenu količinu
-- Prepoznaj srpska jela (ćevapi, pljeskavica, gibanica, prebranac, itd.)
-- OBAVEZNO koristi SRPSKI jezik, NIKADA hrvatski! Primeri: hleb (ne kruh), mleko (ne mlijeko), jaje (ne jaje), pavlaka (ne vrhnje), paradajz (ne rajčica), supa (ne juha), sos (ne umak), testenina (ne tjestenina), paprika (ne paprika), puter (ne maslac), pirinač (ne riža)
-- Vrati SAMO validan JSON niz, bez dodatnog teksta ili markdown-a.`,
+- Ako korisnik navede gramažu (npr "100g", "50g", "200g") — MORAŠ preračunati proporciju
+- Ako korisnik NE navede količinu — pretpostavi 1 standardnu porciju i navedi koliko grama je to
+- PROVERA: kcal ≈ protein×4 + carbs×4 + fat×9 (dozvoljeno odstupanje ±10%)
+- Prepoznaj srpska jela (ćevapi, pljeskavica, gibanica, prebranac, burek, sarma, itd.)
+- OBAVEZNO SRPSKI jezik: hleb (ne kruh), mleko (ne mlijeko), pavlaka (ne vrhnje), paradajz (ne rajčica), supa (ne juha), sos (ne umak), testenina (ne tjestenina), puter (ne maslac), pirinač (ne riža)
+- Vrati SAMO validan JSON niz, bez teksta ili markdown-a.`,
                 messages: [{ role: 'user', content: text }]
             })
         });
@@ -72,9 +93,10 @@ Pravila:
         const content = data.content?.[0]?.text || '[]';
         console.log('Haiku raw response:', content);
 
-        // Strip markdown code fences if present
-        const cleaned = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-        const parsed = JSON.parse(cleaned);
+        // Extract only the JSON array
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) throw new Error('No JSON array found in response');
+        const parsed = JSON.parse(jsonMatch[0]);
         res.json(parsed);
     } catch (err) {
         console.error('Food analysis error:', err.message);
@@ -104,27 +126,46 @@ app.post('/api/analyze-exercise', async (req, res) => {
             },
             body: JSON.stringify({
                 model: 'claude-haiku-4-5-20251001',
-                max_tokens: 1024,
-                system: `Ti si fitnes asistent. Korisnik unosi fizičku aktivnost na srpskom jeziku.
-${userInfo}
-Vrati JSON niz sa prepoznatim aktivnostima. Svaka aktivnost ima:
-- name: string (srpski naziv)
-- duration: string (trajanje, npr "30 min", "1 sat")
-- emoji: string (1 emoji za tu aktivnost)
-- kcalBurned: number (procenjene potrošene kalorije prilagođene težini i polu korisnika)
-- calculationNote: string (kratka formula, npr "MET 7.0 × ${userWeight}kg × 0.5h")
-- category: string (jedna od: "strength", "hiit", "cardio", "light")
-  - "strength" = trening snage (tegovi, sklekovi, čučnjevi, bench press, mrtvo dizanje)
-  - "hiit" = visok intenzitet (HIIT, sprinting, tabata, intervalni trening)
-  - "cardio" = izdržljivost (trčanje, bicikl, plivanje, veslanje, hodanje brzo)
-  - "light" = lagana aktivnost (šetnja, joga, istezanje, pilates)
+                max_tokens: 2048,
+                system: `Ti si precizni fitnes kalkulator. ${userInfo}
 
-Pravila:
-- Koristi MET vrednosti za kalkulaciju: kcal = MET × težina(kg) × trajanje(h)
-- Ako korisnik ne navede trajanje, pretpostavi 30 minuta
-- Kalorije moraju biti realne za navedeno trajanje, intenzitet i podatke korisnika
-- Prepoznaj aktivnosti na srpskom (trčanje, šetnja, teretana, plivanje, bicikl, vožnja bicikla, čučnjevi, sklekovi, yoga, fudbal, košarka, itd.)
-- Vrati SAMO validan JSON niz, bez dodatnog teksta ili markdown-a.`,
+REFERENTNE MET VREDNOSTI (OBAVEZNO koristi ove):
+- Trčanje (lagano, 8km/h): 8.0 | Trčanje (brzo, 10km/h): 10.0
+- Brza šetnja: 3.5 | Lagana šetnja: 2.5
+- Bicikl (umeren): 6.8 | Plivanje (umeren): 7.0
+- Čučnjevi/Mrtvo dizanje/Bench press (sa tegovima): 6.0
+- Sklekovi/Zgibovi: 8.0
+- Biceps/Triceps/Izolacione vežbe: 3.5
+- Vojnički potisak/Ramena: 6.0
+- Plank/Core: 3.8
+- HIIT/Intervalni: 9.0
+- Joga: 3.0 | Istezanje: 2.3
+- Fudbal/Košarka: 8.0 | Tenis: 7.0
+
+METOD KALKULACIJE (OBAVEZNO):
+1. Ako korisnik navede UKUPNO trajanje (npr "sat vremena", "45 min") — rasporedi to vreme na sve vežbe tako da ZBIR bude TAČNO toliko. Uračunaj pauze između serija (~30% ukupnog vremena za trening snage, MET 1.5).
+2. Ako korisnik navede trajanje za svaku vežbu — koristi ta trajanja direktno.
+3. Formula: kcal = MET × ${userWeight}kg × trajanje(h)
+4. PROVERA: Ukupne kalorije za sat vremena mešanog treninga (kardio+snaga) treba da budu 400-550 kcal za osobu od ${userWeight}kg. Ako dobiješ značajno više, smanji — proverio si MET ili trajanje.
+
+RAZMISLI PRE ODGOVORA:
+- Koliko je ukupno vreme? Rasporedi ga realno.
+- Da li su MET vrednosti iz tabele iznad?
+- Da li zbir trajanja odgovara navedenom ukupnom vremenu?
+- Da li ukupne kalorije imaju smisla za tu osobu i to trajanje?
+
+Vrati JSON niz. Svaka aktivnost ima:
+- name: string (srpski naziv)
+- duration: string (trajanje, npr "5 min")
+- emoji: string (1 emoji)
+- kcalBurned: number (zaokruženo na ceo broj)
+- calculationNote: string (formula, npr "MET 6.0 × ${userWeight}kg × 0.133h")
+- category: string ("strength" | "hiit" | "cardio" | "light")
+
+Na kraju JSON niza dodaj JEDNU specijalnu stavku sa ukupnim pregledom:
+{ "name": "_summary", "duration": "UKUPNO VREME", "emoji": "📊", "kcalBurned": UKUPNO_KCAL, "calculationNote": "Prosečan MET X.X za ceo trening", "category": "light" }
+
+Vrati SAMO validan JSON niz.`,
                 messages: [{ role: 'user', content: text }]
             })
         });
@@ -137,8 +178,10 @@ Pravila:
         const content = data.content?.[0]?.text || '[]';
         console.log('Exercise Haiku raw response:', content);
 
-        const cleaned = content.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-        const parsed = JSON.parse(cleaned);
+        // Extract only the JSON array — strip markdown, trailing text, etc.
+        const jsonMatch = content.match(/\[[\s\S]*\]/);
+        if (!jsonMatch) throw new Error('No JSON array found in response');
+        const parsed = JSON.parse(jsonMatch[0]);
         res.json(parsed);
     } catch (err) {
         console.error('Exercise analysis error:', err.message);

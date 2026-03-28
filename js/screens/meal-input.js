@@ -124,7 +124,19 @@ export function renderMealInput(container, params = {}) {
 
         const btn = screen.querySelector('#analyzeBtn');
         btn.disabled = true;
-        btn.innerHTML = '<div class="spinner" style="width:20px; height:20px; border-width:2px;"></div> Analiziram...';
+
+        const thinkingMsgs = [
+            '🔍 Prepoznajem namirnice...',
+            '📊 Tražim nutritivne vrednosti...',
+            '🧮 Računam kalorije i makrose...',
+            '✅ Završavam analizu...'
+        ];
+        let msgIdx = 0;
+        btn.innerHTML = `<div class="spinner" style="width:20px; height:20px; border-width:2px;"></div> ${thinkingMsgs[0]}`;
+        const thinkingInterval = setInterval(() => {
+            msgIdx = Math.min(msgIdx + 1, thinkingMsgs.length - 1);
+            btn.innerHTML = `<div class="spinner" style="width:20px; height:20px; border-width:2px;"></div> ${thinkingMsgs[msgIdx]}`;
+        }, 1200);
 
         try {
             const resp = await fetch('/api/analyze-food', {
@@ -146,6 +158,7 @@ export function renderMealInput(container, params = {}) {
             showToast('Greška pri analizi hrane. Pokušaj ponovo.');
         }
 
+        clearInterval(thinkingInterval);
         render();
     }
 
