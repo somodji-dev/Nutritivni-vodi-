@@ -231,7 +231,9 @@ function showAIDisclaimer(screen, onAccept) {
     overlay.className = 'overlay';
     overlay.innerHTML = `
         <div class="center-modal" style="text-align:center;">
-            <div style="width:56px; height:56px; border-radius:50%; background:var(--primary-light); margin:0 auto 16px; display:flex; align-items:center; justify-content:center; font-size:28px;">🏋️</div>
+            <div style="width:56px; height:56px; border-radius:50%; background:var(--primary-light); margin:0 auto 16px; display:flex; align-items:center; justify-content:center;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg>
+            </div>
             <h3 style="font-size:20px; font-weight:700; color:var(--text-dark);">Ozzy koristi AI</h3>
             <p style="font-size:13px; color:var(--text-light); margin-top:12px; line-height:1.6;">
                 Potrošnja kalorija koju Ozzy prikazuje je generisana pomoću AI tehnologije.

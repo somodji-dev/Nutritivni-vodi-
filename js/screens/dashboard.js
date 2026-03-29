@@ -28,7 +28,11 @@ const SVG = {
     check: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
     chevronRight: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
     plus: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>',
-    share: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.42" y1="6.51" x2="8.59" y2="10.49"/></svg>'
+    share: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.42" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+    // UI icons (replacing emojis)
+    scale: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M2 16l3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>',
+    ruler: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></svg>',
+    utensils: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>'
 };
 
 function getExerciseIcon(name) {
@@ -113,7 +117,7 @@ export function renderDashboard(container) {
                     <div style="display:flex; align-items:center; gap:8px;">
                         <button id="shareBtn" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; flex-direction:column; align-items:center; gap:2px;">
                             ${SVG.share}
-                            <span style="font-size:10px; color:var(--text-light);">Podeli</span>
+                            <span style="font-size:10px; color:var(--text-light);">Podeli app</span>
                         </button>
                         <button id="profileBtn" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; flex-direction:column; align-items:center; gap:2px;">
                             ${SVG.user}
@@ -216,7 +220,7 @@ export function renderDashboard(container) {
             <!-- Današnja težina -->
             <div class="weight-card" id="weightCard" style="cursor:pointer;">
                 <div style="display:flex; align-items:center; gap:8px; flex:1;">
-                    <span style="font-size:18px;">⚖️</span>
+                    <span style="display:flex;">${SVG.scale}</span>
                     <span style="font-size:13px; font-weight:600; color:var(--text-dark);">Današnja težina</span>
                 </div>
                 <span style="font-family:var(--font-numbers); font-size:18px; font-weight:900; color:var(--primary);" id="weightDisplay">${getWeightForDate(selectedDate) || profile.weight || '—'} kg</span>
@@ -295,24 +299,8 @@ export function renderDashboard(container) {
             navigate('profile');
         });
 
-        screen.querySelector('#shareBtn').addEventListener('click', async () => {
-            const shareData = {
-                title: 'OZZY Nutritivni Vodič',
-                text: 'Prati kalorije, obroke i vežbe uz AI analizu! Probaj OZZY:',
-                url: window.location.origin
-            };
-            try {
-                if (navigator.share) {
-                    await navigator.share(shareData);
-                } else {
-                    await navigator.clipboard.writeText(shareData.url);
-                    const toast = document.createElement('div');
-                    toast.textContent = 'Link kopiran!';
-                    toast.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--text-dark); color:white; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:999; animation:fadeIn 0.2s ease;';
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 2000);
-                }
-            } catch(e) { /* user cancelled share */ }
+        screen.querySelector('#shareBtn').addEventListener('click', () => {
+            showSharePopup(screen);
         });
 
         screen.querySelector('#calCard').addEventListener('click', () => showCaloriesPopup(screen, profile, results, exerciseCals, totals.kcal));
@@ -433,6 +421,23 @@ export function renderDashboard(container) {
     // Onboarding overlay — prikaži samo pri prvom otvaranju dashboarda
     if (!isDashboardOnboardingSeen()) {
         showDashboardOnboarding(screen);
+    }
+
+    // Auto-trigger PWA install on second dashboard visit
+    if (visits === 2 && !isStandalone && !sessionStorage.getItem('ozzy_pwa_prompt_shown') && window.__pwaInstallPrompt) {
+        sessionStorage.setItem('ozzy_pwa_prompt_shown', 'true');
+        setTimeout(() => {
+            if (window.__pwaInstallPrompt) {
+                window.__pwaInstallPrompt.prompt();
+                window.__pwaInstallPrompt.userChoice.then(result => {
+                    if (result.outcome === 'accepted') {
+                        dismissPwaInstall();
+                        screen.querySelector('#pwaInstallBanner')?.remove();
+                    }
+                    window.__pwaInstallPrompt = null;
+                });
+            }
+        }, 2000);
     }
 }
 
@@ -646,7 +651,20 @@ function showBMIPopup(screen, profile, results) {
     ];
 
     // Calculate indicator position (16-40 range mapped to 0-100%)
-    const indicatorPos = Math.min(100, Math.max(0, ((bmiVal - 16) / (40 - 16)) * 100));
+    // Piecewise linear: each category gets 25% of the bar
+    function calcBMIPosition(v) {
+        const sections = [
+            { min: 0,    max: 18.5, startPct: 0,  endPct: 25  },
+            { min: 18.5, max: 25,   startPct: 25, endPct: 50  },
+            { min: 25,   max: 30,   startPct: 50, endPct: 75  },
+            { min: 30,   max: 45,   startPct: 75, endPct: 100 }
+        ];
+        for (const s of sections) {
+            if (v <= s.max) return s.startPct + ((v - s.min) / (s.max - s.min)) * (s.endPct - s.startPct);
+        }
+        return 100;
+    }
+    const indicatorPos = Math.min(100, Math.max(0, calcBMIPosition(bmiVal)));
 
     const overlay = document.createElement('div');
     overlay.className = 'overlay';
@@ -664,12 +682,12 @@ function showBMIPopup(screen, profile, results) {
                 </div>
                 <div style="display:flex; gap:20px; margin-top:10px;">
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <span style="font-size:18px;">📏</span>
+                        <span style="display:flex;">${SVG.ruler}</span>
                         <span style="font-size:13px; color:var(--text-light);">Visina</span>
                         <span style="font-family:var(--font-numbers); font-weight:900;">${profile.height} cm</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <span style="font-size:18px;">⚖️</span>
+                        <span style="display:flex;">${SVG.scale}</span>
                         <span style="font-size:13px; color:var(--text-light);">Težina</span>
                         <span style="font-family:var(--font-numbers); font-weight:900;">${w} kg</span>
                     </div>
@@ -769,7 +787,7 @@ function showMacrosPopup(screen, profile, results, exercises = [], exerciseCals 
                     <span class="step-title">Tvoj tip ishrane</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
-                    <span style="font-size:20px;">🍽️</span>
+                    <span style="display:flex;">${SVG.utensils}</span>
                     <span style="font-weight:700;">${profile.dietType}</span>
                     <span style="font-size:12px; color:var(--text-light);">P ${split.protein * 100}% · UH ${split.carbs * 100}% · M ${split.fat * 100}%</span>
                 </div>
@@ -900,6 +918,49 @@ function showWeightInputPopup(screen, profile, date, onSave) {
         }
     });
     overlay.querySelector('#closeWeightPopup').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+    screen.appendChild(overlay);
+}
+
+// ========== Share Popup ==========
+function showSharePopup(screen) {
+    const overlay = document.createElement('div');
+    overlay.className = 'overlay';
+    overlay.innerHTML = `
+        <div class="bottom-sheet" style="padding:28px 24px; text-align:center;">
+            <div style="display:flex; justify-content:flex-end; margin-bottom:8px;">
+                <button id="closeSharePopup" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--text-light);">✕</button>
+            </div>
+            <div style="width:56px; height:56px; border-radius:50%; background:var(--primary-light); margin:0 auto 16px; display:flex; align-items:center; justify-content:center;">
+                ${SVG.share.replace('var(--text-light)', 'var(--primary)').replace('width="20" height="20"', 'width="28" height="28"')}
+            </div>
+            <p style="font-size:15px; font-weight:600; color:var(--text-dark); line-height:1.5;">Podeli aplikaciju sa drugarima, ne brini ne delimo i tvoje podatke.</p>
+            <button id="shareAction" class="btn btn-primary" style="width:100%; margin-top:20px;">Podeli aplikaciju</button>
+        </div>
+    `;
+
+    overlay.querySelector('#shareAction').addEventListener('click', async () => {
+        const shareData = {
+            title: 'OZZY Nutritivni Vodič',
+            text: 'Podeli aplikaciju sa drugarima, ne brini ne delimo i tvoje podatke.',
+            url: window.location.origin
+        };
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(shareData.url);
+                const toast = document.createElement('div');
+                toast.textContent = 'Link kopiran!';
+                toast.style.cssText = 'position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--text-dark); color:white; padding:10px 20px; border-radius:20px; font-size:13px; font-weight:600; z-index:999; animation:fadeIn 0.2s ease;';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+            }
+        } catch(e) { /* user cancelled */ }
+        overlay.remove();
+    });
+
+    overlay.querySelector('#closeSharePopup').addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
     screen.appendChild(overlay);
 }
