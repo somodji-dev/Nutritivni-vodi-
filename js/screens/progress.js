@@ -144,7 +144,8 @@ function buildAreaChart(screen) {
     const colors = [];
     keys.forEach(k => {
         const c = AREA_CFG[k]; if (!c) return;
-        series.push({ name: c.label, data: data.map(d => d[k] || 0) });
+        // Weight and exercise always have values; calories null = no meals logged (skip in chart)
+        series.push({ name: c.label, data: data.map(d => d[k] !== null ? d[k] : null) });
         colors.push(c.color);
     });
 
@@ -219,7 +220,8 @@ function buildBarChart(screen) {
     const colors = [];
     keys.forEach(k => {
         const c = BAR_CFG[k]; if (!c) return;
-        series.push({ name: c.label, data: data.map(d => d[k] || 0) });
+        // null = no meals logged that day (no bar shown)
+        series.push({ name: c.label, data: data.map(d => d[k] !== null ? d[k] : null) });
         colors.push(c.color);
     });
 

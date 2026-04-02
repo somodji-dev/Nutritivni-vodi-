@@ -129,24 +129,35 @@ app.post('/api/analyze-exercise', async (req, res) => {
                 max_tokens: 2048,
                 system: `Ti si precizni fitnes kalkulator. ${userInfo}
 
-REFERENTNE MET VREDNOSTI (OBAVEZNO koristi ove):
-- Trčanje (lagano, 8km/h): 8.0 | Trčanje (brzo, 10km/h): 10.0
-- Brza šetnja: 3.5 | Lagana šetnja: 2.5
-- Bicikl (umeren): 6.8 | Plivanje (umeren): 7.0
+REFERENTNE MET VREDNOSTI iz 2024 Compendium (OBAVEZNO koristi ove):
+- Trčanje (lagano, 8km/h): 8.5 | Trčanje (brzo, 10km/h): 9.3 | Jogging: 7.5
+- Brza šetnja (6km/h): 4.8 | Lagana šetnja: 2.8
+- Bicikl (umeren): 7.0 | Bicikl (intenzivan): 10.0
+- Plivanje (umeren): 5.8 | Plivanje (intenzivno): 9.8
 - Čučnjevi/Mrtvo dizanje/Bench press (sa tegovima): 6.0
 - Sklekovi/Zgibovi: 8.0
 - Biceps/Triceps/Izolacione vežbe: 3.5
 - Vojnički potisak/Ramena: 6.0
-- Plank/Core: 3.8
-- HIIT/Intervalni: 9.0
+- Plank/Core/Trbušnjaci: 3.8
+- HIIT/Intervalni/Tabata: 9.0
 - Joga: 3.0 | Istezanje: 2.3
-- Fudbal/Košarka: 8.0 | Tenis: 7.0
+- Fudbal (rekreativno): 7.0 | Fudbal (takmičarski): 9.5
+- Košarka: 8.0 | Odbojka: 4.0 | Odbojka na pesku: 8.0
+- Tenis singl: 8.0 | Tenis dubl: 6.0 | Badminton: 5.5
+- Boks (ring): 12.3 | Boks (sparing): 7.8 | Boks (džak): 5.8
+- Borilačke veštine (džudo/karate/MMA): 10.3 | Kikboks: 7.3
+- Preskakanje konopca: 11.5 | Stepenice: 8.8
 
 METOD KALKULACIJE (OBAVEZNO):
 1. Ako korisnik navede UKUPNO trajanje (npr "sat vremena", "45 min") — rasporedi to vreme na sve vežbe tako da ZBIR bude TAČNO toliko. Uračunaj pauze između serija (~30% ukupnog vremena za trening snage, MET 1.5).
 2. Ako korisnik navede trajanje za svaku vežbu — koristi ta trajanja direktno.
 3. Formula: kcal = MET × ${userWeight}kg × trajanje(h)
 4. PROVERA: Ukupne kalorije za sat vremena mešanog treninga (kardio+snaga) treba da budu 400-550 kcal za osobu od ${userWeight}kg. Ako dobiješ značajno više, smanji — proverio si MET ili trajanje.
+
+VAŽNO:
+- Vrati SAMO vežbe koje je korisnik eksplicitno naveo. NE dodaj zagrevanje, istezanje, hlađenje ili recovery osim ako korisnik to nije tražio.
+- Ako korisnik kaže "tenis dublovi 1h" — vrati SAMO tenis dublovi, ne dodaj zagrevanje i hlađenje.
+- Ako korisnik navede ceo trening sa pripremom — tek onda uključi sve delove.
 
 RAZMISLI PRE ODGOVORA:
 - Koliko je ukupno vreme? Rasporedi ga realno.
@@ -186,6 +197,153 @@ Vrati SAMO validan JSON niz.`,
     } catch (err) {
         console.error('Exercise analysis error:', err.message);
         res.status(500).json({ error: 'Analysis failed' });
+    }
+});
+
+// ========== Food Database API (Supabase proxy for local dev) ==========
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Search foods
+app.get('/api/food-search', async (req, res) => {
+    const query = req.query.q;
+    if (!query || query.length < 2) return res.json([]);
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return res.status(500).json({ error: 'Supabase not configured' });
+
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/search_foods`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ search_query: query })
+        });
+        const data = await resp.json();
+        res.json(data);
+    } catch (err) {
+        console.error('Food search error:', err.message);
+        res.json([]);
+    }
+});
+
+// Add food to database
+app.post('/api/food-add', async (req, res) => {
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(500).json({ error: 'Supabase not configured' });
+
+    const food = req.body;
+    if (!food.name || !food.kcal_per100g) return res.status(400).json({ error: 'Missing fields' });
+
+    const tokens = food.tokens || food.name.toLowerCase()
+        .replace(/[().,\-\/]/g, ' ').split(/\s+/).filter(t => t.length >= 2)
+        .map(t => t.replace(/č|ć/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj'));
+
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/foods`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_SERVICE_KEY,
+                'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+                name: food.name, tokens, category: food.category || null,
+                preparation: food.preparation || null, type: food.type || 'ingredient',
+                emoji: food.emoji || null, kcal_per100g: food.kcal_per100g,
+                protein_per100g: food.protein_per100g || 0, carbs_per100g: food.carbs_per100g || 0,
+                fat_per100g: food.fat_per100g || 0, portions: food.portions || [],
+                tier: food.tier || 'ai_generated', approximate: food.approximate || false
+            })
+        });
+        const result = await resp.json();
+        res.json(result);
+    } catch (err) {
+        console.error('Food add error:', err.message);
+        res.status(500).json({ error: 'Add failed' });
+    }
+});
+
+// Increment usage count
+app.post('/api/food-use', async (req, res) => {
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(500).json({ error: 'Supabase not configured' });
+
+    const { id } = req.body;
+    if (!id) return res.status(400).json({ error: 'Missing id' });
+
+    try {
+        const getResp = await fetch(`${SUPABASE_URL}/rest/v1/foods?id=eq.${id}&select=usage_count`, {
+            headers: { 'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}` }
+        });
+        const data = await getResp.json();
+        const current = data?.[0]?.usage_count || 0;
+
+        await fetch(`${SUPABASE_URL}/rest/v1/foods?id=eq.${id}`, {
+            method: 'PATCH',
+            headers: {
+                'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ usage_count: current + 1 })
+        });
+        res.json({ ok: true });
+    } catch (err) {
+        res.status(500).json({ error: 'Update failed' });
+    }
+});
+
+// Search exercises in Supabase
+app.get('/api/exercise-search', async (req, res) => {
+    const query = req.query.q;
+    if (!query || query.length < 2) return res.json([]);
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return res.json([]);
+
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/rpc/search_exercises_db`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ search_query: query })
+        });
+        const data = await resp.json();
+        res.json(Array.isArray(data) ? data : []);
+    } catch (err) {
+        res.json([]);
+    }
+});
+
+// Add exercise to Supabase
+app.post('/api/exercise-add', async (req, res) => {
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) return res.status(500).json({ error: 'Supabase not configured' });
+
+    const exercise = req.body;
+    if (!exercise.name || !exercise.met || !exercise.category) return res.status(400).json({ error: 'Missing fields' });
+
+    const tokens = exercise.name.toLowerCase()
+        .replace(/[().,\-\/]/g, ' ').split(/\s+/).filter(t => t.length >= 2)
+        .map(t => t.replace(/č|ć/g, 'c').replace(/š/g, 's').replace(/ž/g, 'z').replace(/đ/g, 'dj'));
+
+    try {
+        const resp = await fetch(`${SUPABASE_URL}/rest/v1/exercises`, {
+            method: 'POST',
+            headers: {
+                'apikey': SUPABASE_SERVICE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_KEY}`,
+                'Content-Type': 'application/json', 'Prefer': 'return=representation'
+            },
+            body: JSON.stringify({
+                name: exercise.name, tokens, category: exercise.category,
+                met: exercise.met, emoji: exercise.emoji || null, tier: 'ai_generated'
+            })
+        });
+        const result = await resp.json();
+        res.json(result);
+    } catch (err) {
+        res.status(500).json({ error: 'Add failed' });
     }
 });
 

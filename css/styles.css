@@ -982,3 +982,193 @@ body {
     align-items: center;
     gap: 12px;
 }
+
+/* ========== Autocomplete ========== */
+.autocomplete-wrapper {
+    position: relative;
+    padding: 0 20px;
+}
+
+.autocomplete-input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid var(--border-light);
+    border-radius: var(--r-md);
+    font-family: Poppins, sans-serif;
+    font-size: 14px;
+    color: var(--text-dark);
+    background: var(--bg-white);
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.autocomplete-input:focus {
+    border-color: var(--primary);
+}
+
+.autocomplete-input::placeholder {
+    color: var(--text-muted);
+}
+
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    right: 20px;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--bg-white);
+    border: 1px solid var(--border-light);
+    border-radius: 0 0 var(--r-md) var(--r-md);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 50;
+    margin-top: -2px;
+}
+
+.autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid var(--bg-light);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.autocomplete-item:active {
+    background: var(--primary-light);
+}
+
+.autocomplete-item-name {
+    flex: 1;
+    min-width: 0;
+}
+
+.autocomplete-item-name span {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.autocomplete-item-name small {
+    font-size: 11px;
+    color: var(--text-light);
+}
+
+.autocomplete-item-kcal {
+    font-family: var(--font-numbers);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--primary);
+    white-space: nowrap;
+}
+
+.autocomplete-ai-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: Poppins, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.autocomplete-empty {
+    padding: 16px;
+    text-align: center;
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+/* ========== Portion / Duration Picker ========== */
+.picker-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.picker-option {
+    padding: 10px 16px;
+    border: 2px solid var(--border-light);
+    border-radius: var(--r-md);
+    background: var(--bg-white);
+    font-family: Poppins, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.picker-option.active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.picker-custom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.picker-custom input {
+    width: 80px;
+    padding: 10px 12px;
+    border: 2px solid var(--border-light);
+    border-radius: var(--r-md);
+    font-family: var(--font-numbers);
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text-dark);
+    outline: none;
+    box-sizing: border-box;
+}
+
+.picker-custom input:focus {
+    border-color: var(--primary);
+}
+
+.picker-custom label {
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.nutrition-preview {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--bg-light);
+    border-radius: var(--r-md);
+    margin: 12px 0;
+}
+
+.nutrition-preview span {
+    font-family: var(--font-numbers);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.nutrition-preview .np-kcal { color: var(--primary); }
+.nutrition-preview .np-p { color: #9C27B0; }
+.nutrition-preview .np-uh { color: var(--blue); }
+.nutrition-preview .np-m { color: var(--green); }

@@ -43,24 +43,35 @@ export default async function handler(req) {
                 max_tokens: 2048,
                 system: `Ti si precizni fitnes kalkulator. ${userInfo}
 
-REFERENTNE MET VREDNOSTI (OBAVEZNO koristi ove):
-- Trčanje (lagano, 8km/h): 8.0 | Trčanje (brzo, 10km/h): 10.0
-- Brza šetnja: 3.5 | Lagana šetnja: 2.5
-- Bicikl (umeren): 6.8 | Plivanje (umeren): 7.0
+REFERENTNE MET VREDNOSTI iz 2024 Compendium (OBAVEZNO koristi ove):
+- Trčanje (lagano, 8km/h): 8.5 | Trčanje (brzo, 10km/h): 9.3 | Jogging: 7.5
+- Brza šetnja (6km/h): 4.8 | Lagana šetnja: 2.8
+- Bicikl (umeren): 7.0 | Bicikl (intenzivan): 10.0
+- Plivanje (umeren): 5.8 | Plivanje (intenzivno): 9.8
 - Čučnjevi/Mrtvo dizanje/Bench press (sa tegovima): 6.0
 - Sklekovi/Zgibovi: 8.0
 - Biceps/Triceps/Izolacione vežbe: 3.5
 - Vojnički potisak/Ramena: 6.0
-- Plank/Core: 3.8
-- HIIT/Intervalni: 9.0
+- Plank/Core/Trbušnjaci: 3.8
+- HIIT/Intervalni/Tabata: 9.0
 - Joga: 3.0 | Istezanje: 2.3
-- Fudbal/Košarka: 8.0 | Tenis: 7.0
+- Fudbal (rekreativno): 7.0 | Fudbal (takmičarski): 9.5
+- Košarka: 8.0 | Odbojka: 4.0 | Odbojka na pesku: 8.0
+- Tenis singl: 8.0 | Tenis dubl: 6.0 | Badminton: 5.5
+- Boks (ring): 12.3 | Boks (sparing): 7.8 | Boks (džak): 5.8
+- Borilačke veštine (džudo/karate/MMA): 10.3 | Kikboks: 7.3
+- Preskakanje konopca: 11.5 | Stepenice: 8.8
 
 METOD KALKULACIJE (OBAVEZNO):
 1. Ako korisnik navede UKUPNO trajanje (npr "sat vremena", "45 min") — rasporedi to vreme na sve vežbe tako da ZBIR bude TAČNO toliko. Uračunaj pauze između serija (~30% ukupnog vremena za trening snage, MET 1.5).
 2. Ako korisnik navede trajanje za svaku vežbu — koristi ta trajanja direktno.
 3. Formula: kcal = MET × ${userWeight}kg × trajanje(h)
 4. PROVERA: Ukupne kalorije za sat vremena mešanog treninga (kardio+snaga) treba da budu 400-550 kcal za osobu od ${userWeight}kg. Ako dobiješ značajno više, smanji — proverio si MET ili trajanje.
+
+VAŽNO:
+- Vrati SAMO vežbe koje je korisnik eksplicitno naveo. NE dodaj zagrevanje, istezanje, hlađenje ili recovery osim ako korisnik to nije tražio.
+- Ako korisnik kaže "tenis dublovi 1h" — vrati SAMO tenis dublovi, ne dodaj zagrevanje i hlađenje.
+- Ako korisnik navede ceo trening sa pripremom — tek onda uključi sve delove.
 
 RAZMISLI PRE ODGOVORA:
 - Koliko je ukupno vreme? Rasporedi ga realno.

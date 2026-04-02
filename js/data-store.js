@@ -110,25 +110,52 @@ export function saveWeightForDate(weight, date) {
 }
 
 // Progress data — collects historical data for chart
+// Smart null handling per data type:
+// - Weight: carry forward last known value (weight doesn't change to 0)
+// - Calories/macros: null if no meals logged that day (skip in chart)
+// - Exercise: 0 is valid (rest day)
 export function getProgressData(days = 30) {
     const data = [];
     const today = new Date();
+    let lastKnownWeight = null;
+
+    // First pass: find initial weight (scan backwards for a known weight)
+    for (let i = days - 1; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const w = getWeightForDate(d.toISOString().slice(0, 10));
+        if (w !== null) { lastKnownWeight = w; break; }
+    }
+    // If no weight found in range, try profile weight
+    if (lastKnownWeight === null) {
+        const profile = safeParse(localStorage.getItem(KEYS.profile));
+        if (profile?.weight) lastKnownWeight = profile.weight;
+    }
+
     for (let i = days - 1; i >= 0; i--) {
         const d = new Date(today);
         d.setDate(d.getDate() - i);
         const dateStr = d.toISOString().slice(0, 10);
         const totals = getTotalsForDate(dateStr);
         const exerciseCals = getExerciseCaloriesForDate(dateStr);
+        const meals = getMealsForDate(dateStr);
         const weight = getWeightForDate(dateStr);
+
+        // Weight: carry forward
+        if (weight !== null) lastKnownWeight = weight;
+
+        // Calories/macros: null if no meals were logged at all
+        const hasMeals = Object.values(meals).some(items => items && items.length > 0);
+
         data.push({
             date: dateStr,
             label: `${d.getDate()}.${d.getMonth() + 1}.`,
-            calories: totals.kcal,
+            calories: hasMeals ? totals.kcal : null,
             exerciseCals,
-            protein: totals.protein,
-            carbs: totals.carbs,
-            fat: totals.fat,
-            weight
+            protein: hasMeals ? totals.protein : null,
+            carbs: hasMeals ? totals.carbs : null,
+            fat: hasMeals ? totals.fat : null,
+            weight: lastKnownWeight
         });
     }
     return data;
